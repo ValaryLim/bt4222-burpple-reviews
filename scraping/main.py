@@ -25,7 +25,7 @@ def generate_restaurants(restaurant_list_dir):
 
 def generate_reviews(restaurant_csv, restaurant_reviews_dir):
     # retrieve restaurants
-    combined_restaurant_df = pd.read_csv(restaurant_csv)[13919:] # scrape from here
+    combined_restaurant_df = pd.read_csv(restaurant_csv) #[3000:6000]
 
     # retrieve reviews per restaurant
     for r_term in combined_restaurant_df["term"].values:
@@ -44,11 +44,11 @@ if __name__ == "__main__":
     REVIEWS_CSV = "../data/processed/reviews_all.csv"
 
     # generate restaurants
-    # generate_restaurants(restaurant_list_dir=RESTAURANT_LIST_DIR)
+    generate_restaurants(restaurant_list_dir=RESTAURANT_LIST_DIR)
     # compile restaurants 
-    # compile(raw_dir=RESTAURANT_LIST_DIR, compiled_dir=RESTAURANT_CSV)
+    compile(raw_dir=RESTAURANT_LIST_DIR, compiled_dir=RESTAURANT_CSV)
 
     # generate reviews
     generate_reviews(restaurant_csv=RESTAURANT_CSV, restaurant_reviews_dir=RESTAURANT_REVIEWS_DIR)
     # compile restaurants 
-    # compile(raw_dir=RESTAURANT_REVIEWS_DIR, compiled_dir=REVIEWS_CSV)
+    compile(raw_dir=RESTAURANT_REVIEWS_DIR, compiled_dir=REVIEWS_CSV)
