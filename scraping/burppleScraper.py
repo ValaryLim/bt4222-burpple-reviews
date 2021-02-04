@@ -85,9 +85,9 @@ def scrape_restaurants_by_neighbourhood(neighbourhood):
     
     # combine to dataframe
     restaurant_df = pd.DataFrame({
-        'id': ids,
-        'name': names,
-        'term': terms,
+        'restaurant_id': ids,
+        'restaurant_name': names,
+        'restaurant_code': terms,
         'location': location,
         'lat': latitude,
         'long': longitude,
@@ -164,9 +164,9 @@ def scrape_reviews_by_restaurant(restaurant_term):
     
     # combine to dataframe
     review_df = pd.DataFrame({
-        'title': titles,
-        'body': bodys,
-        'date': dates,
+        'review_title': titles,
+        'review_body': bodys,
+        'review_date': dates,
         'account_name': names,
         'account_id': ids,
         'account_level': levels,
@@ -174,7 +174,7 @@ def scrape_reviews_by_restaurant(restaurant_term):
         'review_photo': photos
     })
     
-    review_df["term"] = restaurant_term
+    review_df["restaurant_code"] = restaurant_term
     
     return review_df
 
