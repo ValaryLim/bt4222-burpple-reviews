@@ -1,3 +1,8 @@
 data
+.DS_Store
 scraping/utils/chromedriver
 scraping/utils/__pycache__
+scraping/.DS_Store
+scraping/utils/.DS_Store
+
+dashboard/data
