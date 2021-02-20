@@ -6,3 +6,5 @@ scraping/.DS_Store
 scraping/utils/.DS_Store
 
 dashboard/data
+dashboard/__pycache__
+dashboard/apps/__pycache__
