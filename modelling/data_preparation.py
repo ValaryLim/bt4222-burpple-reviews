@@ -12,7 +12,7 @@ np.random.seed(12345)
 
 # load all reviews and restaurants
 reviews_df = pd.read_csv("../data/processed/reviews_all.csv")
-restaurant_df = pd.read_csv("../data/processed/restaurant_all.csv")
+restaurant_df = pd.read_csv("../data/processed/restaurant_all_detailed.csv")
 
 # left join on reviews
 reviews_df = reviews_df.merge(restaurant_df[["restaurant_code", "location"]], on="restaurant_code", how="left")

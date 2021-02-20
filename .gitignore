@@ -2,4 +2,6 @@ data
 scraping/utils/chromedriver
 scraping/utils/__pycache__
 modelling/.ipynb_checkpoints
+modelling/utils/__pycache__
+modelling/dummy_data.py
 .ipynb_checkpoints

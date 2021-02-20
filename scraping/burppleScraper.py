@@ -97,7 +97,7 @@ def scrape_restaurants_by_neighbourhood(neighbourhood):
     
     return restaurant_df
 
-def scrape_reviews_by_restaurant(restaurant_term):
+def scrape_reviews_by_restaurant(restaurant_code):
     '''
     given restaurant term, scrapes all reviews from the restaurant
     '''
@@ -108,7 +108,7 @@ def scrape_reviews_by_restaurant(restaurant_term):
     while True: 
         # retrieve url
         params = {"id": "masonry-container", "offset":offset}
-        review_url = requests.get("https://www.burpple.com/" + restaurant_term + "/reviews", params=params).url
+        review_url = requests.get("https://www.burpple.com/" + restaurant_code + "/reviews", params=params).url
         
         # retrieve html
         review_soup = utils.load_url(review_url)
@@ -174,7 +174,7 @@ def scrape_reviews_by_restaurant(restaurant_term):
         'review_photo': photos
     })
     
-    review_df["restaurant_code"] = restaurant_term
+    review_df["restaurant_code"] = restaurant_code
     
     return review_df
 
@@ -207,10 +207,68 @@ def generate_reviews(restaurant_csv, restaurant_reviews_dir):
         n_path = restaurant_reviews_dir + r_term + ".csv"
         reviews_df.to_csv(n_path, index=False)
 
+def scrape_details_by_restaurant(restaurant_code):
+    restaurant_url = "https://www.burpple.com/" + restaurant_code
+    restaurant_soup = utils.load_url(restaurant_url)
+    try:
+        restaurant_description = restaurant_soup.find("div", {"class": "venue-bio"}).text
+    except:
+        restaurant_description = ""
+    try:
+        restaurant_hours = restaurant_soup.find("div", {"id": "venueInfo-details-header-item-body-hidden-openingHours"}).findAll("p")
+        restaurant_hours = [x.text for x in restaurant_hours]
+    except:
+        restaurant_hours = []
+    try:
+        restaurant_address = restaurant_soup.find("div", {"class": "venue-details__item-body"}).find("p").text.strip()
+    except:
+        restaurant_address = ""
+    try:
+        restaurant_number = restaurant_soup.find("div", {"class": "venue-details__item venue-details__item--phone"}).find("p").text.strip()
+        restaurant_number = "" if "This place does not have a landline" in restaurant_number else restaurant_number
+    except:
+        restaurant_number = ""
+    try:
+        restaurant_website = restaurant_soup.find("div", {"class": "venue-details__item venue-details__item--website"}).text.strip()
+        restaurant_website = "" if "Know the website?" in restaurant_website else restaurant_website
+    except:
+        restaurant_website = ""
+    try:
+        restaurant_photos = restaurant_soup.findAll("div", {"class": "col featured-image"})
+        restaurant_photos = [x.find("img")["src"] for x in restaurant_photos] 
+    except:
+        restaurant_images = []
+    return restaurant_description, restaurant_hours, restaurant_address, restaurant_number, restaurant_website, restaurant_photos
+
+def generate_restaurant_details(restaurant_csv):
+    restaurant_df = pd.read_csv(restaurant_csv)
+    codes, descriptions, hours, addresses, numbers, websites, photos = [], [], [], [], [], [], []
+    for code in restaurant_df.restaurant_code:
+        description, hour, address, number, website, photo = scrape_details_by_restaurant(code)
+        codes.append(code)
+        descriptions.append(description)
+        hours.append(hour)
+        addresses.append(address)
+        numbers.append(number)
+        websites.append(website)
+        photos.append(photo)
+
+    restaurant_description_df = pd.DataFrame({
+        "restaurant_code": codes,
+        "restaurant_description": descriptions,
+        "restaurant_operating_hours": hours, 
+        "restaurant_address": addresses, 
+        "restaurant_number": numbers,
+        "restaurant_website": websites,
+        "restaurant_photo": photos
+    })
+    return restaurant_description_df
+
 if __name__ == "__main__":
     # instantiate directories
     RESTAURANT_LIST_DIR = "../data/raw/restaurant_lists/"
     RESTAURANT_CSV = "../data/processed/restaurant_all.csv"
+    RESTAURANT_DETAILED_CSV = "../data/processed/restaurant_all_detailed.csv"
     RESTAURANT_REVIEWS_DIR = "../data/raw/restaurant_reviews/"
     REVIEWS_CSV = "../data/processed/reviews_all.csv"
 
@@ -218,6 +276,12 @@ if __name__ == "__main__":
     generate_restaurants(restaurant_list_dir=RESTAURANT_LIST_DIR)
     # compile restaurants 
     utils.compile(raw_dir=RESTAURANT_LIST_DIR, compiled_dir=RESTAURANT_CSV)
+
+    # generate restaurant details
+    restaurant_description_df = generate_restaurant_details(restaurant_csv=RESTAURANT_CSV)
+    restaurant_df = pd.read_csv(RESTAURANT_CSV)
+    restaurant_detailed_df = restaurant_df.merge(restaurant_description_df, on="restaurant_code", how="left")
+    restaurant_detailed_df.to_csv(RESTAURANT_DETAILED_CSV, index=False)
 
     # generate reviews
     generate_reviews(restaurant_csv=RESTAURANT_CSV, restaurant_reviews_dir=RESTAURANT_REVIEWS_DIR)
