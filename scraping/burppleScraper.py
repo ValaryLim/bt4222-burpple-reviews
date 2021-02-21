@@ -1,8 +1,10 @@
 import os
 import utils
 import requests
+import datetime
 import numpy as np
 import pandas as pd
+
 
 RESTAURANT_OFFSET_INCREMENT = 12
 REVIEW_OFFSET_INCREMENT = 20
@@ -105,6 +107,8 @@ def scrape_reviews_by_restaurant(restaurant_code):
     
     titles, bodys, dates, names, ids, levels, acc_photos, photos = [], [], [], [], [], [], [], []
     
+    last_month = datetime.date.today() - datetime.timedelta(days=30)
+
     while True: 
         # retrieve url
         params = {"id": "masonry-container", "offset":offset}
@@ -124,6 +128,9 @@ def scrape_reviews_by_restaurant(restaurant_code):
                 title = review.find("div", "food-description-title").text
                 date = format_review_date(review.find("div", "card-item-set--link-subtitle").text.split("\n")[1])
                 
+                if date < last_month: # check for reviews that were posted in the last_month only
+                    continue
+
                 # review details
                 account_name = review.find("div", "card-item-set--link-title").text.split("\n")[1]
                 account_id = review.find("div", "card-item-set--link-title").a["href"].split("/")[1]
@@ -196,7 +203,7 @@ def generate_restaurants(restaurant_list_dir):
 
 def generate_reviews(restaurant_csv, restaurant_reviews_dir):
     # retrieve restaurants
-    combined_restaurant_df = pd.read_csv(restaurant_csv) #[3000:6000]
+    combined_restaurant_df = pd.read_csv(restaurant_csv) #[566:4000]
 
     # retrieve reviews per restaurant
     for r_term in combined_restaurant_df["term"].values:
@@ -269,7 +276,7 @@ if __name__ == "__main__":
     RESTAURANT_LIST_DIR = "../data/raw/restaurant_lists/"
     RESTAURANT_CSV = "../data/processed/restaurant_all.csv"
     RESTAURANT_DETAILED_CSV = "../data/processed/restaurant_all_detailed.csv"
-    RESTAURANT_REVIEWS_DIR = "../data/raw/restaurant_reviews/"
+    RESTAURANT_REVIEWS_DIR = "../data/raw/restaurant_reviews_" + str(datetime.date.today()) + '/'
     REVIEWS_CSV = "../data/processed/reviews_all.csv"
 
     # generate restaurants
