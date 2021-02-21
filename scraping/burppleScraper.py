@@ -5,7 +5,6 @@ import datetime
 import time
 import numpy as np
 import pandas as pd
-from utils.scrapingUtils import *
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 
@@ -131,7 +130,7 @@ def scrape_reviews_by_restaurant(restaurant_code, browser):
         for review in reviews:
             try: # essential information
                 title = review.find("div", "food-description-title").text
-                date = format_review_date(review.find("div", "card-item-set--link-subtitle").text.split("\n")[1])
+                date = utils.format_review_date(review.find("div", "card-item-set--link-subtitle").text.split("\n")[1])
                 
                 if date < last_month: # check for reviews that were posted in the last_month only
                     continue
@@ -141,6 +140,7 @@ def scrape_reviews_by_restaurant(restaurant_code, browser):
                 account_id = review.find("div", "card-item-set--link-title").a["href"].split("/")[1]
 
             except:
+                print('errorrrr')
                 continue
             
             try:
