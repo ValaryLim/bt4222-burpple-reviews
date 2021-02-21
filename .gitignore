@@ -8,3 +8,7 @@ scraping/utils/.DS_Store
 dashboard/data
 dashboard/__pycache__
 dashboard/apps/__pycache__
+modelling/.ipynb_checkpoints
+modelling/utils/__pycache__
+modelling/dummy_data.py
+.ipynb_checkpoints
