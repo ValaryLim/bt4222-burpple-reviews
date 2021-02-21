@@ -1,6 +1,13 @@
 data
+.DS_Store
 scraping/utils/chromedriver
 scraping/utils/__pycache__
+scraping/.DS_Store
+scraping/utils/.DS_Store
+
+dashboard/data
+dashboard/__pycache__
+dashboard/apps/__pycache__
 modelling/.ipynb_checkpoints
 modelling/utils/__pycache__
 modelling/dummy_data.py
