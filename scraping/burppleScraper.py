@@ -118,11 +118,13 @@ def scrape_reviews_by_restaurant(restaurant_code, browser):
         # retrieve url
         params = {"id": "masonry-container", "offset":offset}
         review_url = requests.get("https://www.burpple.com/" + restaurant_code + "/reviews", params=params).url
+
         # retrieve html
         review_soup = utils.load_url(review_url, browser)
         
         # retrieve reviews
         reviews = review_soup.findAll("div", {"class": "food card feed-item"})
+
         if len(reviews) == 0: # no more reviews
             break
         
