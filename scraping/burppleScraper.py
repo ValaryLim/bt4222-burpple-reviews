@@ -5,6 +5,7 @@ import datetime
 import time
 import numpy as np
 import pandas as pd
+from utils.scrapingUtils import *
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 
@@ -117,13 +118,11 @@ def scrape_reviews_by_restaurant(restaurant_code, browser):
         # retrieve url
         params = {"id": "masonry-container", "offset":offset}
         review_url = requests.get("https://www.burpple.com/" + restaurant_code + "/reviews", params=params).url
-
         # retrieve html
         review_soup = utils.load_url(review_url, browser)
         
         # retrieve reviews
         reviews = review_soup.findAll("div", {"class": "food card feed-item"})
-
         if len(reviews) == 0: # no more reviews
             break
         
@@ -138,6 +137,7 @@ def scrape_reviews_by_restaurant(restaurant_code, browser):
                 # review details
                 account_name = review.find("div", "card-item-set--link-title").text.split("\n")[1]
                 account_id = review.find("div", "card-item-set--link-title").a["href"].split("/")[1]
+
             except:
                 continue
             
@@ -184,9 +184,7 @@ def scrape_reviews_by_restaurant(restaurant_code, browser):
         'account_photo': acc_photos,
         'review_photo': photos
     })
-    
-    review_df["restaurant_code"] = restaurant_code
-    
+    review_df["restaurant_code"] = restaurant_code    
     return review_df
 
 def generate_restaurants(restaurant_list_dir, browser):
@@ -207,7 +205,7 @@ def generate_restaurants(restaurant_list_dir, browser):
 
 def generate_reviews(restaurant_csv, restaurant_reviews_dir, browser):
     # retrieve restaurants
-    combined_restaurant_df = pd.read_csv(restaurant_csv) #[900:1000]
+    combined_restaurant_df = pd.read_csv(restaurant_csv) #[11010:11020]
 
     # retrieve reviews per restaurant
     for r_term in combined_restaurant_df["term"].values:
