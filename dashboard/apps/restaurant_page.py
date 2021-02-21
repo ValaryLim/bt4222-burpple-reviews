@@ -1,5 +1,6 @@
 # import packages
 import utils
+import math
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -37,6 +38,7 @@ REVIEW_URL = 'data/dummy_reviews.csv'
 CATEGORIES = ['Italian', 'Malay', 'Japanese', 'Chinese', 'Western', 'Korean',\
     'Thai', 'Vietnamese', 'Mexican', 'Indian', 'Local Delights', 'Desserts', \
     'Healthy', 'Cafes & Coffee', 'Halal', 'Beverages', 'Others']
+SCORE_METRICS = ['Taste', 'Value', 'Service', 'Ambience', 'Overall']
 
 # load restaurant and review data
 restaurant_df = pd.read_csv(RESTAURANT_URL)
@@ -63,8 +65,12 @@ layout = html.Div([
     Input('url', 'pathname'),
 )
 def render_restaurant_page(pathname):
+    # retrieve restaurant code from path name
     restaurant_code = pathname.split("/")[1][11:]
+
+    # filter for restaurant and review details
     restaurant_info = restaurant_df.loc[restaurant_df["restaurant_code"] == restaurant_code]
+    filtered_reviews = review_df.loc[review_df["restaurant_code"] == restaurant_code]
     restaurant_page = []
 
     photo_collage = []
@@ -81,7 +87,7 @@ def render_restaurant_page(pathname):
     for cat in CATEGORIES:
         if restaurant_info[cat].values[0] == 1:
             restaurant_page.append(
-                html.Button(cat, id=cat, n_clicks=0, \
+                dbc.Button(cat, id=cat, n_clicks=0, \
                     style={"margin-right": "0.5rem", "margin-bottom": "1rem"}))
 
     restaurant_description = restaurant_info["restaurant_description"]
@@ -111,9 +117,79 @@ def render_restaurant_page(pathname):
         html.Div([
             html.I(className="fa fa-money", \
                 style={"font-size": "18px", "margin-top": "0.25rem", "margin-right":"1rem"}), 
-            html.P(restaurant_price)
+            html.P("$" + str(restaurant_price) + " /pax")
         ], style={"display": "flex", "font-size": "14px"})   
     )
 
     restaurant_page.append(html.Hr())
+
+    restaurant_reviews = []
+    # print reviews 
+    for i, row in filtered_reviews.iterrows():
+        review_title = row["review_title"]
+        review_body = row["review_body"]
+        review_date = row["review_date"]
+        review_photo = row["review_photo"]
+        review_reviewer = row["account_name"]
+        review_reviewer_level = row["account_level"]
+        review_reviewer_photo = row["account_photo"]
+
+        review_table_body = []
+        for review_metric in SCORE_METRICS:
+            if math.isnan(row["review_rating_" + review_metric.lower()]):
+                continue
+            else:
+                review_table_body.append(
+                    html.Tr([html.Td(review_metric, style={"font-weight": "bold"}), 
+                    html.Td(round(row["review_rating_" + review_metric.lower()], 2))],
+                    style={"font-size": "14px"}
+                ))
+        
+        review_jumbotron = dbc.Jumbotron([
+            dbc.Container([
+                dbc.Row([
+                    dbc.Col(html.Img(src=review_photo, style={"width": "100%"}), width=3, style={"margin": "0px"}),
+                    dbc.Col(html.Div([
+                        html.H5(review_title, className="review-title"),
+                        html.P(review_body, className="review-body", style={"font-size": "14px"}),
+                        html.Hr(),
+                        dbc.Row([
+                            dbc.Col(html.Img(src=review_reviewer_photo, style={"width": "80%", "border-radius": "50%"}), width=2),
+                            dbc.Col([
+                                html.H6(review_reviewer, className="review-reviewer"), 
+                                html.P(review_reviewer_level, className="review-date", style={"margin-bottom": "5px", "padding": "0px", "font-size": "14px"}),
+                                html.P(review_date, className="review-date", style={"margin": "0px", "padding": "0px", "font-size": "14px"})
+                            ])
+                        ])
+                    ])),
+                    dbc.Col(dbc.Table([html.Tbody(review_table_body)], borderless=True), width=2),
+                ], style={"margin":"0px", "padding": "0px"})
+            ], fluid=True, style={"margin":"0px", "padding": "0px"})
+        ], fluid=True, style={"padding": "15px 0px 15px 0px"})
+
+        restaurant_reviews.append(review_jumbotron)
+
+    #     review_card = dbc.Card([
+    #         dbc.CardImg(src=review_photo, top=True),
+    #         dbc.CardBody([
+    #             html.H6(review_title, className="review-title"),
+    #             html.P(review_body, className="review-body"),
+    #             html.P(review_date, className="review-date"),
+    #             html.Hr(),
+    #             html.P(review_rating_taste, className="review-rating"),
+    #             html.P(review_rating_value, className="review-rating"),
+    #             html.P(review_rating_service, className="review-rating"),
+    #             html.P(review_rating_ambience, className="review-rating"),
+    #             html.P(review_rating_overall, className="review-rating"),
+    #         ])
+    #     ], style={"width": "330px", "margin":"0.5rem"})
+        
+    #     restaurant_reviews.append(review_card)
+    
+    # card_columns = dbc.CardColumns(restaurant_reviews, style={"columns": "4"})
+    # restaurant_page.append(card_columns)
+
+    restaurant_page.append(html.Div(restaurant_reviews))
+
+    restaurant_page.append(html.Div(restaurant_reviews, style={"display": "inline"}))
     return (restaurant_page)
