@@ -13,6 +13,8 @@ def load_url(url):
     ''' 
     chrome_options = Options()  
     chrome_options.add_argument("--headless") # Opens the browser up in background
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--no-sandbox")
 
     with Chrome("./utils/chromedriver", options=chrome_options) as browser:
         browser.get(url)
