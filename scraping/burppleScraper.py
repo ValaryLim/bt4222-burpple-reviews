@@ -214,7 +214,7 @@ def generate_reviews(restaurant_csv, restaurant_reviews_dir, browser):
         # save restaurant
         n_path = restaurant_reviews_dir + r_term + ".csv"
         reviews_df.to_csv(n_path, index=False)
-        time.sleep(np.random.uniform(2,3.2)) 
+        time.sleep(np.random.uniform(3,6)) 
 
 def scrape_details_by_restaurant(restaurant_code, browser):
     restaurant_url = "https://www.burpple.com/" + restaurant_code
