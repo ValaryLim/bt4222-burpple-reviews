@@ -23,7 +23,7 @@ def load_url(url):
     soup = BeautifulSoup(html, "html.parser")
     return soup
 
-def format_search_terms(terms):
+def format_search_terms(terms): 
     return ["+".join(term.split("-")) for term in terms]
 
 def format_review_date(date):
