@@ -99,7 +99,7 @@ def scrape_restaurants_by_neighbourhood(neighbourhood, browser):
         'price_per_pax': price,
         'categories': categories
     })
-    # restaurant_df['scraped_date'] = datetime.date.today()
+    restaurant_df['scraped_date'] = datetime.date.today()
     return restaurant_df
 
 
@@ -186,7 +186,7 @@ def scrape_reviews_by_restaurant(restaurant_code, browser):
         'review_photo': photos
     })
     review_df["restaurant_code"] = restaurant_code    
-    # review_df["scraped_date"] = datetime.date.today()
+    review_df["scraped_date"] = datetime.date.today()
     return review_df
 
 def generate_restaurants(restaurant_list_dir, browser):
@@ -276,7 +276,7 @@ def generate_restaurant_details(restaurant_csv, browser):
         "restaurant_photo": photos
     })
 
-    # restaurant_description_df['scraped_date'] = datetime.date.today()
+    restaurant_description_df['scraped_date'] = datetime.date.today()
 
     return restaurant_description_df
 
