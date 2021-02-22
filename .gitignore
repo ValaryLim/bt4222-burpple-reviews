@@ -5,6 +5,10 @@ scraping/utils/chromedriver.exe
 scraping/utils/__pycache__
 scraping/.DS_Store
 scraping/utils/.DS_Store
+scraper1
+scraper2
+scraper3
+scraper4
 
 dashboard/data
 dashboard/__pycache__

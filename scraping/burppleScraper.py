@@ -5,7 +5,6 @@ import datetime
 import time
 import numpy as np
 import pandas as pd
-from utils.scrapingUtils import *
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 
@@ -100,7 +99,7 @@ def scrape_restaurants_by_neighbourhood(neighbourhood, browser):
         'price_per_pax': price,
         'categories': categories
     })
-    
+    restaurant_df['scraped_date'] = datetime.date.today()
     return restaurant_df
 
 
@@ -112,7 +111,7 @@ def scrape_reviews_by_restaurant(restaurant_code, browser):
     
     titles, bodys, dates, names, ids, levels, acc_photos, photos = [], [], [], [], [], [], [], []
     
-    last_month = datetime.date.today() - datetime.timedelta(days=30)
+    last_month = datetime.date.today() - datetime.timedelta(months=1)
 
     while True: 
         # retrieve url
@@ -131,7 +130,7 @@ def scrape_reviews_by_restaurant(restaurant_code, browser):
         for review in reviews:
             try: # essential information
                 title = review.find("div", "food-description-title").text
-                date = format_review_date(review.find("div", "card-item-set--link-subtitle").text.split("\n")[1])
+                date = utils.format_review_date(review.find("div", "card-item-set--link-subtitle").text.split("\n")[1])
                 
                 if date < last_month: # check for reviews that were posted in the last_month only
                     continue
@@ -187,6 +186,7 @@ def scrape_reviews_by_restaurant(restaurant_code, browser):
         'review_photo': photos
     })
     review_df["restaurant_code"] = restaurant_code    
+    review_df["scraped_date"] = datetime.date.today()
     return review_df
 
 def generate_restaurants(restaurant_list_dir, browser):
@@ -207,10 +207,10 @@ def generate_restaurants(restaurant_list_dir, browser):
 
 def generate_reviews(restaurant_csv, restaurant_reviews_dir, browser):
     # retrieve restaurants
-    combined_restaurant_df = pd.read_csv(restaurant_csv) #[11010:11020]
+    combined_restaurant_df = pd.read_csv(restaurant_csv) #[7501:11250]
 
     # retrieve reviews per restaurant
-    for r_term in combined_restaurant_df["term"].values:
+    for r_term in combined_restaurant_df["restaurant_code"].values:
         reviews_df = scrape_reviews_by_restaurant(r_term, browser) 
 
         # save restaurant
@@ -219,8 +219,10 @@ def generate_reviews(restaurant_csv, restaurant_reviews_dir, browser):
         time.sleep(np.random.uniform(3,6)) 
 
 def scrape_details_by_restaurant(restaurant_code, browser):
+    # from selenium.webdriver.common.by import By
     restaurant_url = "https://www.burpple.com/" + restaurant_code
     restaurant_soup = utils.load_url(restaurant_url, browser)
+    #print(restaurant_soup)
     try:
         restaurant_description = restaurant_soup.find("div", {"class": "venue-bio"}).text
     except:
@@ -273,6 +275,9 @@ def generate_restaurant_details(restaurant_csv, browser):
         "restaurant_website": websites,
         "restaurant_photo": photos
     })
+
+    restaurant_description_df['scraped_date'] = datetime.date.today()
+
     return restaurant_description_df
 
 if __name__ == "__main__":
@@ -281,7 +286,7 @@ if __name__ == "__main__":
     RESTAURANT_CSV = "../data/processed/restaurant_all.csv"
     RESTAURANT_DETAILED_CSV = "../data/processed/restaurant_all_detailed.csv"
     RESTAURANT_REVIEWS_DIR = "../data/raw/restaurant_reviews_" + str(datetime.date.today()) + '/'
-    REVIEWS_CSV = "../data/processed/reviews_all.csv"
+    REVIEWS_CSV = "../data/processed/reviews_all_" + str(datetime.date.today()) + "_.csv"
 
     # configure chrome options 
     chrome_options = Options()  
@@ -291,18 +296,19 @@ if __name__ == "__main__":
 
     with Chrome("./utils/chromedriver", options=chrome_options) as browser:
         # generate restaurants
-        generate_restaurants(restaurant_list_dir=RESTAURANT_LIST_DIR, browser=browser)
+        # generate_restaurants(restaurant_list_dir=RESTAURANT_LIST_DIR, browser=browser)
         # compile restaurants 
-        utils.compile(raw_dir=RESTAURANT_LIST_DIR, compiled_dir=RESTAURANT_CSV)
+        # utils.compile(raw_dir=RESTAURANT_LIST_DIR, compiled_dir=RESTAURANT_CSV)
 
         # generate restaurant details
-        restaurant_description_df = generate_restaurant_details(restaurant_csv=RESTAURANT_CSV, browser=browser)
-        restaurant_df = pd.read_csv(RESTAURANT_CSV)
-        restaurant_detailed_df = restaurant_df.merge(restaurant_description_df, on="restaurant_code", how="left")
-        restaurant_detailed_df.to_csv(RESTAURANT_DETAILED_CSV, index=False)
+        # restaurant_description_df = generate_restaurant_details(restaurant_csv=RESTAURANT_CSV, browser=browser)
+        # scrape_details_by_restaurant('79-after-dark', browser)
+        # restaurant_df = pd.read_csv(RESTAURANT_CSV)
+        # restaurant_detailed_df = restaurant_df.merge(restaurant_description_df, on="restaurant_code", how="left")
+        # restaurant_detailed_df.to_csv(RESTAURANT_DETAILED_CSV, index=False)
 
         # generate reviews
         generate_reviews(restaurant_csv=RESTAURANT_CSV, restaurant_reviews_dir=RESTAURANT_REVIEWS_DIR, browser=browser)
 
         # compile restaurants 
-        utils.compile(raw_dir=RESTAURANT_REVIEWS_DIR, compiled_dir=REVIEWS_CSV)
+        # utils.compile(raw_dir=RESTAURANT_REVIEWS_DIR, compiled_dir=REVIEWS_CSV)
