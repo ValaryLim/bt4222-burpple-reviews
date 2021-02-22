@@ -4,19 +4,14 @@ import requests
 import numpy as np
 import pandas as pd
 from bs4 import BeautifulSoup
-from selenium.webdriver import Chrome
-from selenium.webdriver.chrome.options import Options
 
-def load_url(url):
+
+def load_url(url, browser):
     ''' 
     Loads html of any url in burpple and returns BeautifulSoup object
-    ''' 
-    chrome_options = Options()  
-    chrome_options.add_argument("--headless") # Opens the browser up in background
-
-    with Chrome("./utils/chromedriver", options=chrome_options) as browser:
-        browser.get(url)
-        html = browser.page_source
+    '''
+    browser.get(url)
+    html = browser.page_source
     
     soup = BeautifulSoup(html, "html.parser")
     return soup
