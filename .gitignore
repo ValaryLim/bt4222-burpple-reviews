@@ -13,6 +13,7 @@ scraper4
 dashboard/data
 dashboard/__pycache__
 dashboard/apps/__pycache__
+dashboard/utils/__pycache__
 modelling/.ipynb_checkpoints
 modelling/utils/__pycache__
 modelling/dummy_data.py
