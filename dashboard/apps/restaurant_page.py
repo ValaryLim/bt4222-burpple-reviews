@@ -38,7 +38,7 @@ REVIEW_URL = 'data/dummy_reviews.csv'
 CATEGORIES = ['Italian', 'Malay', 'Japanese', 'Chinese', 'Western', 'Korean',\
     'Thai', 'Vietnamese', 'Mexican', 'Indian', 'Local Delights', 'Desserts', \
     'Healthy', 'Cafes & Coffee', 'Halal', 'Beverages', 'Others']
-SCORE_METRICS = ['Taste', 'Value', 'Service', 'Ambience', 'Overall']
+ASPECTS = ['Taste', 'Value', 'Service', 'Ambience', 'Overall']
 
 # load restaurant and review data
 restaurant_df = pd.read_csv(RESTAURANT_URL)
@@ -58,6 +58,30 @@ layout = html.Div([
     header,
     html.Div(id='restaurant-page', style=CONTENT_STYLE)
 ])
+
+review_aspect_sorter = html.Div([
+    dcc.Dropdown(
+        id = "aspect-order-input",
+        value = "Overall",
+        options = [
+            {'label': aspect, 'value': aspect} for aspect in ASPECTS
+        ],
+        className = 'm-3',
+    )], style = {'width': '15%', 'display': 'inline-block', 'font-size': '15px'}
+)
+
+review_aspect_order = html.Div([
+        dcc.Dropdown(
+            id = "aspect-order-ascending",
+            value = "Ascending",
+            options = [
+                {"label": "Ascending", "value": "Ascending"},
+                {"label": "Descending", "value": "Descending"}
+            ],
+            className = 'm-3',
+        )
+    ], style = {'width': '15%', 'display': 'inline-block', 'font-size': '15px'}
+)
 
 
 @app.callback(
@@ -123,6 +147,9 @@ def render_restaurant_page(pathname):
 
     restaurant_page.append(html.Hr())
 
+    restaurant_page.append(review_aspect_sorter)
+    restaurant_page.append(review_aspect_order)
+
     restaurant_reviews = []
     # print reviews 
     for i, row in filtered_reviews.iterrows():
@@ -135,7 +162,7 @@ def render_restaurant_page(pathname):
         review_reviewer_photo = row["account_photo"]
 
         review_table_body = []
-        for review_metric in SCORE_METRICS:
+        for review_metric in ASPECTS:
             if math.isnan(row["review_rating_" + review_metric.lower()]):
                 continue
             else:
@@ -148,7 +175,7 @@ def render_restaurant_page(pathname):
         review_jumbotron = dbc.Jumbotron([
             dbc.Container([
                 dbc.Row([
-                    dbc.Col(html.Img(src=review_photo, style={"width": "100%"}), width=3, style={"margin": "0px"}),
+                    dbc.Col(html.Img(src=review_photo, style={"width": "100%"}), width=2, style={"margin": "0px"}),
                     dbc.Col(html.Div([
                         html.H5(review_title, className="review-title"),
                         html.P(review_body, className="review-body", style={"font-size": "14px"}),
@@ -168,26 +195,6 @@ def render_restaurant_page(pathname):
         ], fluid=True, style={"padding": "15px 0px 15px 0px"})
 
         restaurant_reviews.append(review_jumbotron)
-
-    #     review_card = dbc.Card([
-    #         dbc.CardImg(src=review_photo, top=True),
-    #         dbc.CardBody([
-    #             html.H6(review_title, className="review-title"),
-    #             html.P(review_body, className="review-body"),
-    #             html.P(review_date, className="review-date"),
-    #             html.Hr(),
-    #             html.P(review_rating_taste, className="review-rating"),
-    #             html.P(review_rating_value, className="review-rating"),
-    #             html.P(review_rating_service, className="review-rating"),
-    #             html.P(review_rating_ambience, className="review-rating"),
-    #             html.P(review_rating_overall, className="review-rating"),
-    #         ])
-    #     ], style={"width": "330px", "margin":"0.5rem"})
-        
-    #     restaurant_reviews.append(review_card)
-    
-    # card_columns = dbc.CardColumns(restaurant_reviews, style={"columns": "4"})
-    # restaurant_page.append(card_columns)
 
     restaurant_page.append(html.Div(restaurant_reviews))
 
