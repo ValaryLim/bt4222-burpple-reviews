@@ -38,7 +38,7 @@ REVIEW_URL = 'data/dummy_reviews.csv'
 CATEGORIES = ['Italian', 'Malay', 'Japanese', 'Chinese', 'Western', 'Korean',\
     'Thai', 'Vietnamese', 'Mexican', 'Indian', 'Local Delights', 'Desserts', \
     'Healthy', 'Cafes & Coffee', 'Halal', 'Beverages', 'Others']
-SCORE_METRICS = ['Taste', 'Value', 'Service', 'Ambience', 'Overall']
+ASPECTS = ['Overall', 'Taste', 'Value', 'Service', 'Ambience']
 
 # load restaurant and review data
 restaurant_df = pd.read_csv(RESTAURANT_URL)
@@ -59,10 +59,38 @@ layout = html.Div([
     html.Div(id='restaurant-page', style=CONTENT_STYLE)
 ])
 
+aspect_input = html.Div([
+    dcc.Dropdown(
+        id = "aspect-input",
+        value="Overall",
+        options = [
+            {'label': aspect, 'value': aspect} for aspect in ASPECTS
+        ],
+        className = 'm-3',
+        searchable=False,
+        clearable=False
+    )
+], style = {'width': '170px', 'display': 'inline-block', 'font-size': '14px'})
+
+# aspect order sort input
+order_input = html.Div([
+    dcc.Dropdown(
+        id = "order-input",
+        value = "Descending",
+        options = [
+            {'label': 'Descending', 'value': 'Descending'},
+            {'label': 'Ascending', 'value': 'Ascending'}
+        ],
+        className = 'm-3',
+        searchable=False,
+        clearable=False
+    )
+], style = {'width': '170px', 'display': 'inline-block', 'font-size': '14px'})
+
 
 @app.callback(
     Output("restaurant-page", "children"),
-    Input('url', 'pathname'),
+    Input('url', 'pathname')
 )
 def render_restaurant_page(pathname):
     # retrieve restaurant code from path name
@@ -70,7 +98,6 @@ def render_restaurant_page(pathname):
 
     # filter for restaurant and review details
     restaurant_info = restaurant_df.loc[restaurant_df["restaurant_code"] == restaurant_code]
-    filtered_reviews = review_df.loc[review_df["restaurant_code"] == restaurant_code]
     restaurant_page = []
 
     photo_collage = []
@@ -91,8 +118,7 @@ def render_restaurant_page(pathname):
                     style={"margin-right": "0.5rem", "margin-bottom": "1rem"}))
 
     restaurant_description = restaurant_info["restaurant_description"]
-    restaurant_page.append(html.P(restaurant_description, \
-        style={"font-size": "14px"}))
+    restaurant_page.append(html.P(restaurant_description, style={"font-size": "14px"}))
 
     restaurant_number = str(restaurant_info["restaurant_number"].values[0])
     restaurant_page.append(
@@ -121,7 +147,39 @@ def render_restaurant_page(pathname):
         ], style={"display": "flex", "font-size": "14px"})   
     )
 
+    # overall restaurant rating
     restaurant_page.append(html.Hr())
+    table_header = [
+        html.Thead(html.Tr([html.Th(x) for x in ASPECTS]))
+    ]
+    table_row = []
+    for aspect in ASPECTS:
+        aspect_score = round(restaurant_info["review_rating_" + aspect.lower()].values[0], 2)
+        table_row.append(html.Td(str(aspect_score) + " / 5.00"))
+    table_body = [html.Tbody([html.Tr(table_row)])]
+    restaurant_page.append(dbc.Table(table_header + table_body, borderless=True, \
+        style={"font-size": "20px", "text-align": "center"}))
+
+    # reviews and inputs to sort by aspect (ascending/descending)
+    restaurant_page.append(html.Hr())
+    restaurant_page.append(dbc.Row([aspect_input, order_input], justify='end'))
+    restaurant_page.append(html.Div([], id="restaurant-reviews"))
+
+    return (restaurant_page)
+
+@app.callback(
+    Output('restaurant-reviews', 'children'),
+    [Input('aspect-input', 'value'), Input('order-input', 'value')],
+    State('url', 'pathname'))
+def update_output(aspect, order, pathname):
+    # retrieve restaurant code from path name
+    restaurant_code = pathname.split("/")[1][11:]
+
+    # REVIEWS SECTION #
+    filtered_reviews = review_df.loc[review_df["restaurant_code"] == restaurant_code]
+    ascending = (order == "Ascending")
+    selected_aspect = "review_rating_" + aspect.lower()
+    filtered_reviews = filtered_reviews.sort_values(by=selected_aspect, ascending=ascending)
 
     restaurant_reviews = []
     # print reviews 
@@ -134,62 +192,55 @@ def render_restaurant_page(pathname):
         review_reviewer_level = row["account_level"]
         review_reviewer_photo = row["account_photo"]
 
-        review_table_body = []
-        for review_metric in SCORE_METRICS:
-            if math.isnan(row["review_rating_" + review_metric.lower()]):
-                continue
-            else:
-                review_table_body.append(
-                    html.Tr([html.Td(review_metric, style={"font-weight": "bold"}), 
-                    html.Td(round(row["review_rating_" + review_metric.lower()], 2))],
-                    style={"font-size": "14px"}
-                ))
+        review_overall_score = None
+        if selected_aspect == "review_rating_overall":
+            review_overall_score = html.H6(f'Overall   : {round(row["review_rating_overall"], 2)}/5.0', \
+                style={"margin-top":"5px", "margin-left":"12px", "color": "#BF0A30"})
+        else:
+            review_overall_score = html.H6(f'Overall   : {round(row["review_rating_overall"], 2)}/5.0', \
+                style={"margin-top":"5px", "margin-left":"12px"})
         
+        review_table_body = []
+        for review_metric in ASPECTS[1:]: # exclude overall
+            column = "review_rating_" + review_metric.lower()
+            if column == selected_aspect:
+                if math.isnan(row[column]):
+                    review_table_body.append(html.Tr([html.Td(review_metric, style={"font-weight": "bold", "color":"#BF0A30"}), \
+                        html.Td("-", style={"color":"#BF0A30", "font-weight": "bold"})], 
+                        style={"padding": "0px"}))
+                else:
+                    review_table_body.append(html.Tr([html.Td(review_metric, style={"font-weight": "bold", "color":"#BF0A30"}), \
+                        html.Td(round(row[column], 2), style={"color":"#BF0A30", "font-weight": "bold"})],
+                        style={"padding": "0px"}))
+            else:
+                if math.isnan(row[column]):
+                    review_table_body.append(html.Tr([html.Td(review_metric, style={"font-weight": "bold"}), \
+                        html.Td("-")], style={"padding": "0px"}))
+                else:
+                    review_table_body.append(html.Tr([html.Td(review_metric, style={"font-weight": "bold"}), \
+                        html.Td(round(row[column], 2))], style={"padding": "0px"}))
+    
         review_jumbotron = dbc.Jumbotron([
             dbc.Container([
                 dbc.Row([
-                    dbc.Col(html.Img(src=review_photo, style={"width": "100%"}), width=3, style={"margin": "0px"}),
+                    dbc.Col(html.Img(src=review_photo, style={"width": "100%"}), width=2, style={"margin": "0px"}),
                     dbc.Col(html.Div([
                         html.H5(review_title, className="review-title"),
-                        html.P(review_body, className="review-body", style={"font-size": "14px"}),
+                        html.P(review_body, className="review-body"),
                         html.Hr(),
                         dbc.Row([
-                            dbc.Col(html.Img(src=review_reviewer_photo, style={"width": "80%", "border-radius": "50%"}), width=2),
+                            dbc.Col(html.Img(src=review_reviewer_photo, style={"width": "100%", "border-radius": "50%"}), width=1),
                             dbc.Col([
                                 html.H6(review_reviewer, className="review-reviewer"), 
-                                html.P(review_reviewer_level, className="review-date", style={"margin-bottom": "5px", "padding": "0px", "font-size": "14px"}),
-                                html.P(review_date, className="review-date", style={"margin": "0px", "padding": "0px", "font-size": "14px"})
+                                html.P(review_reviewer_level + ", " + review_date, style={"margin-bottom": "5px", "padding": "0px"})
                             ])
                         ])
                     ])),
-                    dbc.Col(dbc.Table([html.Tbody(review_table_body)], borderless=True), width=2),
+                    dbc.Col([review_overall_score, dbc.Table([html.Tbody(review_table_body)], borderless=True)], width=2),
                 ], style={"margin":"0px", "padding": "0px"})
             ], fluid=True, style={"margin":"0px", "padding": "0px"})
         ], fluid=True, style={"padding": "15px 0px 15px 0px"})
 
         restaurant_reviews.append(review_jumbotron)
 
-    #     review_card = dbc.Card([
-    #         dbc.CardImg(src=review_photo, top=True),
-    #         dbc.CardBody([
-    #             html.H6(review_title, className="review-title"),
-    #             html.P(review_body, className="review-body"),
-    #             html.P(review_date, className="review-date"),
-    #             html.Hr(),
-    #             html.P(review_rating_taste, className="review-rating"),
-    #             html.P(review_rating_value, className="review-rating"),
-    #             html.P(review_rating_service, className="review-rating"),
-    #             html.P(review_rating_ambience, className="review-rating"),
-    #             html.P(review_rating_overall, className="review-rating"),
-    #         ])
-    #     ], style={"width": "330px", "margin":"0.5rem"})
-        
-    #     restaurant_reviews.append(review_card)
-    
-    # card_columns = dbc.CardColumns(restaurant_reviews, style={"columns": "4"})
-    # restaurant_page.append(card_columns)
-
-    restaurant_page.append(html.Div(restaurant_reviews))
-
-    restaurant_page.append(html.Div(restaurant_reviews, style={"display": "inline"}))
-    return (restaurant_page)
+    return restaurant_reviews
