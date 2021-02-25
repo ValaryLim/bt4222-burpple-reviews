@@ -12,7 +12,6 @@ def load_url(url, browser):
     '''
     browser.get(url)
     html = browser.page_source
-    
     soup = BeautifulSoup(html, "html.parser")
     return soup
 
