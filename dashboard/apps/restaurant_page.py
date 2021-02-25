@@ -21,7 +21,9 @@ HEADER_STYLE = {
     "width": "100%",
     "height": "6rem",
     "padding": "1rem 1rem",
-    "background-color": "#FFD1DC",
+    "border-bottom-style": "solid",
+    "border-bottom-color": "black",
+    # "background-color": "#FFD1DC",
     "font-size": "12px"
 }
 
@@ -49,7 +51,7 @@ review_df = pd.read_csv(REVIEW_URL)
 header = html.Div(
     [
         dbc.Row([html.H5("burpple+", className="display-4", \
-            style={'font-weight': '500', 'margin-left': 20})]),
+            style={"color":"#BF0A30", 'font-weight': '500', 'margin-left': 20})]),
     ],
     style=HEADER_STYLE
 )
