@@ -144,7 +144,7 @@ search_button = html.Div([
 #### header layout ####
 header = html.Div(
     [
-        dbc.Row([html.H5("burpple+", className="display-4", style={"color":"#BF0A30", 'font-weight': '500', 'margin-left': 20, 'margin-right': 40, 'margin-bottom': 10}),
+        dbc.Row([html.H5("burpple+", className="display-4", style={"color":"#BF0A30", 'font-weight': '700', 'margin-left': 20, 'margin-right': 30, 'margin-bottom': 10}),
                 restaurant_input,
                 location_input,
                 category_input,
@@ -239,38 +239,34 @@ def generate_restaurants_list(data, aspect_input):
             else:
                 restaurant_categories += f', {cat}'
 
-    # retrieve aspect ratings
-    restaurant_ratings = dict()
-    for aspect in aspects_list:
-        restaurant_ratings[aspect] = round(data[f'review_rating_{str(aspect).lower()}'], 2)
-
-    # sort in decreasing aspect ratings (excluding overall and selected aspect)
-    if aspect_input != "overall":
-        restaurant_ratings.pop(aspect_input, None)
-    restaurant_ratings_sorted = dict(sorted(restaurant_ratings.items(), key=lambda item: item[1], reverse=True))
-    sorted_keys = list(restaurant_ratings_sorted.keys())
-
-    aspect_table_body = []
-
-    # display top 3 aspects
-    aspects_to_display = 3
+    # retrieve overall score
     overall_score_display = html.H4(f'Overall: {restaurant_overall_rating}/5', style={"margin-top":"5px", "margin-left":"12px", "color": "#BF0A30"})
 
     if aspect_input != "overall":
-        selected_aspect_score = round(data['review_rating_'+str(aspect_input).lower()], 2)
-        aspect_table_body.append(html.Tr([html.Td(f"{aspect_input.capitalize()}", style={'font-weight': 'bold', 'color': '#BF0A30', 'font-size': '14px'}),
-                                          html.Td(f"{selected_aspect_score}", style={"color":"#BF0A30", "font-weight": "bold", 'font-size': '14px'})],
-                                          style={"padding": "0px"}))
-        # display top 2 aspects excluding selected one
-        aspects_to_display = 2
         overall_score_display = html.H4(f'Overall: {restaurant_overall_rating}/5', style={"margin-top":"5px", "margin-left":"12px", "color": "black"})
     
-    for i in range(aspects_to_display):
-        aspect_table_body.append(html.Tr([html.Td(f'{sorted_keys[i].capitalize()}', style={'font-weight': 'bold', 'font-size': '14px'}),
-                                            html.Td(f"{restaurant_ratings_sorted[sorted_keys[i]]}", style={"font-size": "14px"})],
-                                            style={"padding": "0px"}))
+    # retrieve aspect ratings
+    aspect_table_body = []
+    for review_metric in aspects_list: 
+        column = "review_rating_" + review_metric.lower()
+        if review_metric == aspect_input:
+            if math.isnan(data[column]):
+                aspect_table_body.append(html.Tr([html.Td(review_metric.capitalize(), style={"font-weight": "bold", "color":"#BF0A30"}), \
+                    html.Td("-", style={"color":"#BF0A30", "font-weight": "bold"})], 
+                    style={"padding": "0px"}))
+            else:
+                aspect_table_body.append(html.Tr([html.Td(review_metric.capitalize(), style={"font-weight": "bold", "color":"#BF0A30"}), \
+                    html.Td(round(data[column], 2), style={"color":"#BF0A30", "font-weight": "bold"})],
+                    style={"padding": "0px"}))
+        else:
+            if math.isnan(data[column]):
+                aspect_table_body.append(html.Tr([html.Td(review_metric.capitalize(), style={"font-weight": "bold"}), \
+                    html.Td("-")], style={"padding": "0px"}))
+            else:
+                aspect_table_body.append(html.Tr([html.Td(review_metric.capitalize(), style={"font-weight": "bold"}), \
+                    html.Td(round(data[column], 2))], style={"padding": "0px"}))
 
-    aspect_ratings_display = dbc.Col([overall_score_display, dbc.Table([html.Tbody(aspect_table_body)], borderless=True)], width=2)
+    aspect_ratings_display = dbc.Col([overall_score_display, dbc.Table([html.Tbody(aspect_table_body)], borderless=True, style={'font-size': '14px'})], width=2)
 
     # return a container with the details (formatted)
     return html.Div([

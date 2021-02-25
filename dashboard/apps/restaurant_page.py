@@ -51,7 +51,7 @@ review_df = pd.read_csv(REVIEW_URL)
 header = html.Div(
     [
         dbc.Row([html.H5("burpple+", className="display-4", \
-            style={"color":"#BF0A30", 'font-weight': '500', 'margin-left': 20})]),
+            style={"color":"#BF0A30", 'font-weight': '700', 'margin-left': 20})]),
     ],
     style=HEADER_STYLE
 )
