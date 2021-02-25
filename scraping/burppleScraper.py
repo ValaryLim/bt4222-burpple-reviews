@@ -101,6 +101,7 @@ def scrape_restaurants_by_neighbourhood(neighbourhood, browser):
         'price_per_pax': price,
         'categories': categories
     })
+    
     return restaurant_df
 
 def scrape_reviews_by_restaurant(restaurant_code, browser):
@@ -219,8 +220,10 @@ def generate_reviews(restaurant_csv, restaurant_reviews_dir, browser):
         time.sleep(np.random.uniform(3,5)) 
 
 def scrape_details_by_restaurant(restaurant_code, browser):
+    # from selenium.webdriver.common.by import By
     restaurant_url = "https://www.burpple.com/" + restaurant_code
     browser.get(restaurant_url)
+
     try:
         # Check if more button is present in description
         find_more=browser.find_element_by_xpath("//span[@class='venue-bio--more']")
@@ -282,7 +285,6 @@ def generate_restaurant_details(restaurant_csv, browser):
         "restaurant_website": websites,
         "restaurant_photo": photos
     })
-
     return restaurant_description_df
 
 if __name__ == "__main__":
