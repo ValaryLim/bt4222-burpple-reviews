@@ -159,7 +159,7 @@ header = html.Div(
 #### ASPECT RATING FILTERS ##########################################################
 # retrieve aspect ratings
 aspects_list_all = [x for x in aspects_list]
-aspects_list_all.sort() # sort in alphabetical order
+# aspects_list_all.sort() # sort in alphabetical order
 aspects_list_all.insert(0, 'overall')
 
 # aspect input 
