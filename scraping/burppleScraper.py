@@ -266,6 +266,7 @@ def scrape_details_by_restaurant(restaurant_code, browser):
 def generate_restaurant_details(restaurant_csv, browser):
     restaurant_df = pd.read_csv(restaurant_csv)
     codes, descriptions, hours, addresses, numbers, websites, photos = [], [], [], [], [], [], []
+    count = 0
     for code in restaurant_df.restaurant_code:
         description, hour, address, number, website, photo = scrape_details_by_restaurant(code, browser)
         codes.append(code)
@@ -275,6 +276,9 @@ def generate_restaurant_details(restaurant_csv, browser):
         numbers.append(number)
         websites.append(website)
         photos.append(photo)
+        count += 1
+        if (count % 50 == 0):
+            print(str(count) + " out of " + str(len(restaurant_df)) + " done")
 
     restaurant_description_df = pd.DataFrame({
         "restaurant_code": codes,
@@ -289,32 +293,32 @@ def generate_restaurant_details(restaurant_csv, browser):
 
 if __name__ == "__main__":
     # instantiate directories
-    RESTAURANT_LIST_DIR = "../data/raw/restaurant_lists/"
-    RESTAURANT_CSV = "../data/processed/restaurant_all.csv"
-    RESTAURANT_DETAILED_CSV = "../data/processed/restaurant_all_detailed.csv"
-    RESTAURANT_REVIEWS_DIR = "../data/raw/restaurant_reviews_" + str(datetime.date.today()) + '/'
-    REVIEWS_CSV = "../data/processed/reviews_all_" + str(datetime.date.today()) + "_.csv"
+    RESTAURANT_LIST_DIR = "../data/raw/restaurant_lists_mar/"
+    RESTAURANT_CSV = "../data/processed/restaurant_all_mar.csv"
+    RESTAURANT_DETAILED_CSV = "../data/processed/restaurant_all_detailed_mar.csv"
+    RESTAURANT_REVIEWS_DIR = "../data/raw/restaurant_reviews_mar/"
+    REVIEWS_CSV = "../data/processed/reviews_all_mar.csv" 
 
     # configure chrome options 
     chrome_options = Options()  
-    chrome_options.add_argument("--headless") # Opens the browser up in background
+    # chrome_options.add_argument("--headless") # Opens the browser up in background
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--no-sandbox")
 
     with Chrome("./utils/chromedriver", options=chrome_options) as browser:
         # generate restaurants
-        generate_restaurants(restaurant_list_dir=RESTAURANT_LIST_DIR, browser=browser)
+        # generate_restaurants(restaurant_list_dir=RESTAURANT_LIST_DIR, browser=browser)
         # compile restaurants 
-        utils.compile(raw_dir=RESTAURANT_LIST_DIR, compiled_dir=RESTAURANT_CSV)
+        # utils.compile(raw_dir=RESTAURANT_LIST_DIR, compiled_dir=RESTAURANT_CSV)
 
         # generate restaurant details
-        restaurant_description_df = generate_restaurant_details(restaurant_csv=RESTAURANT_CSV, browser=browser)
-        restaurant_df = pd.read_csv(RESTAURANT_CSV)
-        restaurant_detailed_df = restaurant_df.merge(restaurant_description_df, on="restaurant_code", how="left")
-        restaurant_detailed_df.to_csv(RESTAURANT_DETAILED_CSV, index=False)
+        # restaurant_description_df = generate_restaurant_details(restaurant_csv=RESTAURANT_CSV, browser=browser)
+        # restaurant_df = pd.read_csv(RESTAURANT_CSV)
+        # restaurant_detailed_df = restaurant_df.merge(restaurant_description_df, on="restaurant_code", how="left")
+        # restaurant_detailed_df.to_csv(RESTAURANT_DETAILED_CSV, index=False)
 
         # generate reviews
         # generate_reviews(restaurant_csv=RESTAURANT_CSV, restaurant_reviews_dir=RESTAURANT_REVIEWS_DIR, browser=browser)
 
         # compile restaurants 
-        # utils.compile(raw_dir=RESTAURANT_REVIEWS_DIR, compiled_dir=REVIEWS_CSV)
+        utils.compile(raw_dir=RESTAURANT_REVIEWS_DIR, compiled_dir=REVIEWS_CSV)
