@@ -5,7 +5,7 @@ from dash.dependencies import Input, Output
 
 # import apps
 from app import app
-from apps import search_restaurants, restaurant_page
+from apps import main_page, restaurant_page
 
 #### APP LAYOUT ##########################################################
 app.layout = html.Div([
@@ -20,7 +20,7 @@ app.layout = html.Div([
 
 def display_page(pathname):
     if pathname == '/':
-        return search_restaurants.layout
+        return main_page.layout
     elif '/restaurant-' in pathname:
         return restaurant_page.layout
     #     return # something

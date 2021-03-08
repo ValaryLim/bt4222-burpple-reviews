@@ -307,15 +307,15 @@ if __name__ == "__main__":
 
     with Chrome("./utils/chromedriver", options=chrome_options) as browser:
         # generate restaurants
-        # generate_restaurants(restaurant_list_dir=RESTAURANT_LIST_DIR, browser=browser)
+        generate_restaurants(restaurant_list_dir=RESTAURANT_LIST_DIR, browser=browser)
         # compile restaurants 
-        # utils.compile(raw_dir=RESTAURANT_LIST_DIR, compiled_dir=RESTAURANT_CSV)
+        utils.compile(raw_dir=RESTAURANT_LIST_DIR, compiled_dir=RESTAURANT_CSV)
 
         # generate restaurant details
-        # restaurant_description_df = generate_restaurant_details(restaurant_csv=RESTAURANT_CSV, browser=browser)
-        # restaurant_df = pd.read_csv(RESTAURANT_CSV)
-        # restaurant_detailed_df = restaurant_df.merge(restaurant_description_df, on="restaurant_code", how="left")
-        # restaurant_detailed_df.to_csv(RESTAURANT_DETAILED_CSV, index=False)
+        restaurant_description_df = generate_restaurant_details(restaurant_csv=RESTAURANT_CSV, browser=browser)
+        restaurant_df = pd.read_csv(RESTAURANT_CSV)
+        restaurant_detailed_df = restaurant_df.merge(restaurant_description_df, on="restaurant_code", how="left")
+        restaurant_detailed_df.to_csv(RESTAURANT_DETAILED_CSV, index=False)
 
         # generate reviews
         # generate_reviews(restaurant_csv=RESTAURANT_CSV, restaurant_reviews_dir=RESTAURANT_REVIEWS_DIR, browser=browser)
