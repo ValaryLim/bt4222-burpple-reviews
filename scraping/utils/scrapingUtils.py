@@ -22,12 +22,16 @@ def format_review_date(date):
     date = date.strip()
     if "h ago" in date:
         hours_ago = int(date.split("h ago")[0])
-        review_datetime = datetime.datetime.now() - timedelta(hours = hours_ago)
+        review_datetime = datetime.datetime.now() - datetime.timedelta(hours = hours_ago)
         return review_datetime.date()
     elif "d ago" in date:
         days_ago = int(date.split("d ago")[0])
-        review_date = datetime.date.today() - timedelta(days = days_ago)
+        review_date = datetime.date.today() - datetime.timedelta(days = days_ago)
         return review_date
+    elif "at" in date: # "Feb 3 at 8:36pm"
+        review_date_str = date.split("at")[0] + '2021'
+        review_date = datetime.datetime.strptime(review_date_str, "%b %d %Y")
+        return review_date.date()
     else: # "Dec 3, 2020"
         review_datetime = datetime.datetime.strptime(date, "%b %d, %Y")
         return review_datetime.date()
