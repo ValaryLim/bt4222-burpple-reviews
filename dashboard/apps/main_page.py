@@ -18,7 +18,6 @@ from app import app
 #### STYLES ##########################################################
 # style arguments for header
 HEADER_STYLE = {
-    # "position": "sticky",
     "top": 0,
     "left": 0,
     "bottom": 0,
@@ -27,14 +26,17 @@ HEADER_STYLE = {
     "padding": "1rem 1rem",
     "border-bottom-style": "solid",
     "border-bottom-color": "black",
-    # "background-color": "#FFD1DC",
-    "font-size": "12px"
+    "background-color": "white",
+    "font-size": "12px",
+    "zIndex": 100,
+    "position": "fixed"
 }
 
 # styles for the main content 
 CONTENT_STYLE = {
-    # "margin-top": "5rem",
-    "padding": "2rem 1rem",
+    "padding-top": "10px",
+    "padding-left": "1rem",
+    "padding-right": "1rem",
     "font-size": "12px"
 }
 

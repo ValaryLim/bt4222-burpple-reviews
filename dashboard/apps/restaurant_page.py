@@ -23,16 +23,20 @@ HEADER_STYLE = {
     "padding": "1rem 1rem",
     "border-bottom-style": "solid",
     "border-bottom-color": "black",
-    # "background-color": "#FFD1DC",
-    "font-size": "12px"
+    "background-color": "white",
+    "font-size": "12px",
+    "zIndex": 100,
+    "position": "fixed"
 }
 
 # styles for the main content 
 CONTENT_STYLE = {
-    # "margin-top": "5rem",
-    "padding": "1rem 1rem",
+    "padding-top": "75px",
+    "padding-left": "1rem",
+    "padding-right": "1rem",
     "font-size": "12px",
-    "margin": "2rem"
+    "margin": "2rem",
+    "zIndex": 0
 }
 
 RESTAURANT_URL = 'data/dummy_restaurants.csv'
@@ -50,8 +54,9 @@ review_df = pd.read_csv(REVIEW_URL)
 # header
 header = html.Div(
     [
-        dbc.Row([html.H5("burpple+", className="display-4", \
-            style={"color":"#BF0A30", 'font-weight': '700', 'margin-left': 20})]),
+        dbc.Row(dcc.Link(
+                html.H5("burpple+", className="display-4", style={"color":"#BF0A30", 'font-weight': '700', 'margin-left': 20}),
+                href='/', style={"color":"#BF0A30"}))
     ],
     style=HEADER_STYLE
 )
@@ -101,6 +106,10 @@ def render_restaurant_page(pathname):
     # filter for restaurant and review details
     restaurant_info = restaurant_df.loc[restaurant_df["restaurant_code"] == restaurant_code]
     restaurant_page = []
+    
+    # if no restaurant info, don't generate any output
+    if len(restaurant_info) == 0:
+        return restaurant_page
 
     photo_collage = []
     restaurant_photos = restaurant_info["restaurant_photo"].values[0]
@@ -241,7 +250,7 @@ def update_output(aspect, order, pathname):
                     dbc.Col([review_overall_score, dbc.Table([html.Tbody(review_table_body)], borderless=True)], width=2),
                 ], style={"margin":"0px", "padding": "0px"})
             ], fluid=True, style={"margin":"0px", "padding": "0px"})
-        ], fluid=True, style={"padding": "15px 0px 15px 0px"})
+        ], fluid=True, style={"padding": "15px 0px 15px 0px", "position": "relative"})
 
         restaurant_reviews.append(review_jumbotron)
 
