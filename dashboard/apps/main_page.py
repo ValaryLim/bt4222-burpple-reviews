@@ -6,10 +6,12 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 import plotly.express as px
 
+import numpy as np
+import pandas as pd
+import math
+
 # import app
 from app import app
-
-import pandas as pd
 
 
 
@@ -23,7 +25,9 @@ HEADER_STYLE = {
     "width": "100%",
     "height": "6rem",
     "padding": "1rem 1rem",
-    "background-color": "#FFD1DC",
+    "border-bottom-style": "solid",
+    "border-bottom-color": "black",
+    # "background-color": "#FFD1DC",
     "font-size": "12px"
 }
 
@@ -45,7 +49,10 @@ restaurants_list.sort() # sort in alphabetical order
 
 # retrieve unique prices
 prices_list = list(restaurants_data.price_per_pax.unique())
+prices_list = [x for x in prices_list if str(x) != 'nan'] # remove nan
 prices_list.sort() # sort in increasing value
+max_price = int(max(prices_list))
+min_price = int(min(prices_list))
 
 # retrieve unique locations
 locations_list = list(restaurants_data.location.unique())
@@ -60,36 +67,21 @@ for col in restaurants_data.columns:
             if aspect != 'overall':
                 aspects_list.append(col[14:])
 
-# category list
+# category list (static)
 CATEGORIES = ['Italian', 'Malay', 'Japanese', 'Chinese', 'Western', 'Korean',\
     'Thai', 'Vietnamese', 'Mexican', 'Indian', 'Local Delights', 'Desserts', \
     'Healthy', 'Cafes & Coffee', 'Halal', 'Beverages', 'Others']
 
 # restaurant input
-
 restaurant_input = html.Div([
     dcc.Input(
         id="restaurant-input", 
         value='',
         placeholder = "Search for a restaurant or food",
         type="text",
-        style = {'width': '95%', 'font-size': '15px', "padding": "0.3rem 0.5rem"}
+        style = {'width': '95%', 'font-size': '15px', 'padding': '0.3rem 0.5rem', 'margin-top': '3px', 'border-width': 'thin', 'border-color': '#CCCCCC', 'border-style': 'solid'}
     ),
-], style = {'width': '30%', 'margin-left': '10px', 'margin-top': '15px','margin-right': '3px', 'font-size': '15px'}
-)
-
-
-# price range input
-price_input = html.Div([
-    dcc.Dropdown(
-        id = "price-input",
-        placeholder = "Price Range",
-        options = [
-            {'label': price, 'value': price} for price in prices_list if str(price) != 'nan'
-        ],
-        className = 'm-3',
-    )
-], style = {'width': '13%', 'display': 'inline-block', 'font-size': '15px'}
+], style = {'width': '20%', 'margin-left': '10px', 'margin-top': '15px','margin-right': '3px', 'font-size': '15px'}
 )
 
 # location input
@@ -118,20 +110,45 @@ category_input = html.Div([
 ], style = {'width': '13%', 'display': 'inline-block', 'font-size': '15px'}
 )
 
+# price range input
+price_input = html.Div([
+    html.Div(id='output-range-slider', style={'text-align': 'center'}),
+    dcc.RangeSlider(
+        id='price-input',
+        min=0,
+        max=max_price,
+        step=5,
+        marks = {
+            int(x): str(x) for x in range(0, max_price+1, 50)
+        },
+        value=[0, max_price],
+        allowCross=False,
+    )
+], style = {'width': '20%', 'display': 'inline-block', 'font-size': '15px', 'align-items': 'centre'}
+)
+
+# callback to display selected range from price slider
+@app.callback(
+    Output('output-range-slider', 'children'),
+    [Input('price-input', 'value')]
+)
+def update_output(value):
+    return f'Price Range: ${value[0]}-{value[1]}'
+
 # search button
 search_button = html.Div([
-    dbc.Button("Search", color="dark", block=False, id="search", className="mb-3")
-    ], className = 'm-3', style = {'width': '10%', 'display': 'inline-block', 'font-size': '15px'}
+    dbc.Button("Search", color="dark", outline=False, block=False, id="search", className="mb-3")
+    ], className = 'm-3', style = {'width': '10%', 'display': 'inline-block', 'font-size': '15px', 'margin-right': 0}
 )
 
 #### header layout ####
 header = html.Div(
     [
-        dbc.Row([html.H5("burpple+", className="display-4", style={'font-weight': '500', 'margin-left': 20}),
+        dbc.Row([html.H5("burpple+", className="display-4", style={"color":"#BF0A30", 'font-weight': '700', 'margin-left': 20, 'margin-right': 30, 'margin-bottom': 10}),
                 restaurant_input,
-                price_input,
                 location_input,
                 category_input,
+                price_input,
                 search_button]),
     ],
     style=HEADER_STYLE
@@ -142,18 +159,20 @@ header = html.Div(
 #### ASPECT RATING FILTERS ##########################################################
 # retrieve aspect ratings
 aspects_list_all = [x for x in aspects_list]
-aspects_list_all.sort()
-# aspects_list_all.insert(0, 'overall')
+# aspects_list_all.sort() # sort in alphabetical order
+aspects_list_all.insert(0, 'overall')
 
 # aspect input 
 aspect_input = html.Div([
     dcc.Dropdown(
         id = "aspect-input",
-        placeholder = "sort by aspect",
+        value="overall",
         options = [
-            {'label': aspect, 'value': aspect} for aspect in aspects_list_all
+            {'label': aspect.capitalize(), 'value': aspect} for aspect in aspects_list_all
         ],
         className = 'm-3',
+        searchable=False,
+        clearable=False
     )
 ], style = {'width': '15%', 'display': 'inline-block', 'font-size': '15px'})
 
@@ -161,44 +180,45 @@ aspect_input = html.Div([
 order_input = html.Div([
     dcc.Dropdown(
         id = "order-input",
-        placeholder = "descending",
+        value="Descending",
+        placeholder = "Descending",
         options = [
-            {'label': 'descending', 'value': 'Best'},
-            {'label': 'ascending', 'value': 'Worst'}
+            {'label': 'Descending', 'value': 'Descending'},
+            {'label': 'Ascending', 'value': 'Ascending'}
         ],
         className = 'm-3',
+        searchable=False,
+        clearable=False
     )
-], style = {'width': '10%', 'display': 'inline-block', 'font-size': '15px'})
+], style = {'width': '12%', 'display': 'inline-block', 'font-size': '15px'})
 
 
 
 #### MAIN PAGE LAYOUT ##########################################################
 layout = html.Div([
     header,
-    # html.H3(id='subtitle-output', style=CONTENT_STYLE),
-    # aspect_order_inputs,
-    dbc.Row([dbc.Col(html.H3(id='subtitle-output', style={'margin-left': '20px', 'margin-top': '15px'})), 
-             aspect_input, order_input], justify='end', style={'margin-right': '20px', 'margin-top': '15px'}),
+    dbc.Row([dbc.Col(html.H3(id='subtitle-output', style={'margin-left': '20px', 'margin-top': '20px'})), 
+             aspect_input, order_input], justify='end', style={'margin-right': '20px', 'margin-top': '20px'}),
     html.Div(id='restaurants-output', style=CONTENT_STYLE)
 ])
 
 
 
 #### MAIN PAGE CALLBACKS ##########################################################
-
 def generate_restaurants_list(data, aspect_input):
     '''
     generates a container with details of a restaurant
     '''
     # retrieve restaurant details
     restaurant_name = str(data.restaurant_name)
-    # retrieve restaurant description
+    restaurant_code = str(data.restaurant_code)
     restaurant_description = str(data.restaurant_description)
-    if len(restaurant_description) == 1: # check for empty description
+    if len(restaurant_description) <= 1: # check for empty description
         restaurant_description = 'This restaurant does not have a description.'
-    # retrive restaurant location
     restaurant_location = data.location
-    # retrieve restaurant overall rating
+    restaurant_price = data.price_per_pax
+    if math.isnan(restaurant_price): # check for nan price
+        restaurant_price = "-"
     restaurant_overall_rating = round(data.review_rating_overall, 2)
     
     # retrieve restaurant photo
@@ -219,35 +239,34 @@ def generate_restaurants_list(data, aspect_input):
             else:
                 restaurant_categories += f', {cat}'
 
+    # retrieve overall score
+    overall_score_display = html.H4(f'Overall: {restaurant_overall_rating}/5', style={"margin-top":"5px", "margin-left":"12px", "color": "#BF0A30"})
+
+    if aspect_input != "overall":
+        overall_score_display = html.H4(f'Overall: {restaurant_overall_rating}/5', style={"margin-top":"5px", "margin-left":"12px", "color": "black"})
+    
     # retrieve aspect ratings
-    restaurant_ratings = dict()
-    for aspect in aspects_list:
-        restaurant_ratings[aspect] = round(data[f'review_rating_{aspect}'], 2)
+    aspect_table_body = []
+    for review_metric in aspects_list: 
+        column = "review_rating_" + review_metric.lower()
+        if review_metric == aspect_input:
+            if math.isnan(data[column]):
+                aspect_table_body.append(html.Tr([html.Td(review_metric.capitalize(), style={"font-weight": "bold", "color":"#BF0A30"}), \
+                    html.Td("-", style={"color":"#BF0A30", "font-weight": "bold"})], 
+                    style={"padding": "0px"}))
+            else:
+                aspect_table_body.append(html.Tr([html.Td(review_metric.capitalize(), style={"font-weight": "bold", "color":"#BF0A30"}), \
+                    html.Td(round(data[column], 2), style={"color":"#BF0A30", "font-weight": "bold"})],
+                    style={"padding": "0px"}))
+        else:
+            if math.isnan(data[column]):
+                aspect_table_body.append(html.Tr([html.Td(review_metric.capitalize(), style={"font-weight": "bold"}), \
+                    html.Td("-")], style={"padding": "0px"}))
+            else:
+                aspect_table_body.append(html.Tr([html.Td(review_metric.capitalize(), style={"font-weight": "bold"}), \
+                    html.Td(round(data[column], 2))], style={"padding": "0px"}))
 
-    # sort in decreasing aspect ratings
-    restaurant_ratings_sorted = dict(sorted(restaurant_ratings.items(), key=lambda item: item[1], reverse=True))
-    sorted_keys = list(restaurant_ratings_sorted.keys())
-    aspect_ratings_display = dbc.Col([dbc.Row(html.H4(f'Overall: {restaurant_overall_rating}/5')),
-                                        dbc.Row(html.H6('for alignment', style={'color': '#FAFAFA'})),
-                                        dbc.Row(html.H6(f'{sorted_keys[0]}: {restaurant_ratings_sorted[sorted_keys[0]]}')),
-                                        dbc.Row(html.H6(f'{sorted_keys[1]}: {restaurant_ratings_sorted[sorted_keys[1]]}')),
-                                        dbc.Row(html.H6(f'{sorted_keys[2]}: {restaurant_ratings_sorted[sorted_keys[2]]}'))], 
-                                        width=2)
-
-    # if there is an aspect input
-    if aspect_input != None:
-        restaurant_ratings.pop(aspect_input, None)
-        # sort other aspects (besides selected aspect)
-        restaurant_ratings_sorted = dict(sorted(restaurant_ratings.items(), key=lambda item: item[1], reverse=True))
-        sorted_keys = list(restaurant_ratings_sorted.keys())
-        # show selected aspect score first, followed by top 2 aspects
-        selected_aspect_score = round(data['review_rating_'+str(aspect_input)], 2)
-        aspect_ratings_display = dbc.Col([dbc.Row(html.H4(f'Overall: {restaurant_overall_rating}/5')),
-                                            dbc.Row(html.H6('for alignment', style={'color': '#FAFAFA'})),
-                                            dbc.Row(html.H6(f'{aspect_input}: {selected_aspect_score}'), style={'color': 'red'}),
-                                            dbc.Row(html.H6(f'{sorted_keys[0]}: {restaurant_ratings_sorted[sorted_keys[0]]}')),
-                                            dbc.Row(html.H6(f'{sorted_keys[1]}: {restaurant_ratings_sorted[sorted_keys[1]]}'))], 
-                                            width=2)
+    aspect_ratings_display = dbc.Col([overall_score_display, dbc.Table([html.Tbody(aspect_table_body)], borderless=True, style={'font-size': '14px'})], width=2)
 
     # return a container with the details (formatted)
     return html.Div([
@@ -256,15 +275,18 @@ def generate_restaurants_list(data, aspect_input):
             dbc.Row([
                 dbc.Col(html.Img(src=restaurant_photo, style={"height": "100%", "width": "100%", "padding": "0.5rem"}), width=2),
                 dbc.Col([
-                    dbc.Row(html.H4(restaurant_name)),
-                    dbc.Row(html.H6(restaurant_location, style={'color': '#671FFF', 'text-align': 'right'})),
-                    dbc.Row(restaurant_description, style={'font-size': '13px', 'margin-right': '5px'}),
+                    dbc.Row(dcc.Link(html.H4(restaurant_name), href=f'/restaurant-{restaurant_code}', style={'color': 'black'})),
+                    dbc.Row(html.H6(restaurant_location)), 
+                    dbc.Row([html.I(className="fa fa-money", style={"font-size": "18px", "margin-top": "0rem", "margin-right":"0.5rem"}), 
+                             html.P("$" + str(restaurant_price) + " /pax", style={'font-size': '14px'})
+                    ]),
+                    dbc.Row(restaurant_description, style={'font-size': '14px', 'margin-right': '5px'}),
                     html.Br(),
-                    dbc.Row(f'Categories: {restaurant_categories}', style={'font-weight': 'bold', 'font-size': '13px'})
+                    dbc.Row(f'Categories: {restaurant_categories}', style={'font-weight': 'bold', 'font-size': '14px'})
                 ], width=8),
                 aspect_ratings_display,
             ])
-        ], style = {"margin-left": '20px', "margin-right": '20px', "padding": "1rem 1rem", "background-color": "#FAFAFA"}),
+        ], style = {"margin-left": '20px', "margin-right": '20px', "padding": "1rem 1rem", "background-color": "#eaecef"}),
         html.Br()
     ])
 
@@ -284,11 +306,7 @@ def generate_restaurants_list(data, aspect_input):
 
 #### RENDER MAIN PAGE ##########################################################
 
-def render_main_page(n_clicks, aspect, order, restaurant, location, price, category):
-    if n_clicks == None:
-        # return None if user has not searched for anything
-        return (None, None)
-    
+def render_main_page(n_clicks, aspect, order, restaurant, location, price, category):    
     # read data
     restaurants_data = pd.read_csv(RESTAURANTS_CSV_PATH)
     restaurants_filter = restaurants_data.copy()
@@ -306,26 +324,33 @@ def render_main_page(n_clicks, aspect, order, restaurant, location, price, categ
     if location != None:
         restaurants_filter = restaurants_filter.loc[restaurants_data.location == location]
         subtitle += f' "{location}" '
-    # filter by price
-    if price != None:
-        restaurants_filter = restaurants_filter.loc[restaurants_filter.price_per_pax == price]
-        subtitle += f' "${price} per pax" '
     # filter by category
     if category != None:
         restaurants_filter = restaurants_filter.loc[restaurants_filter[category] == 1]
         subtitle += f' "{category} category" '
+    # filter by price
+    if (price[0] != 0) | (price[1] != 200): # default is [0, 200], check for deviations from default
+        restaurants_filter = restaurants_filter.loc[restaurants_filter.price_per_pax <= price[1]]
+        restaurants_filter = restaurants_filter.loc[restaurants_filter.price_per_pax >= price[0]]
+        subtitle += f' "${price[0]}-{price[1]} per pax" '
 
     # sort by overall review score
     restaurants_filter = restaurants_filter.sort_values(by=['review_rating_overall'], axis=0, ascending=False)
 
     # check for order of sort, returns top scores first by default
     ascending_boolean = False
-    if order == 'Worst':
+    if order == 'Ascending':
         ascending_boolean = True
 
     # check for aspect filters
     if aspect != None:
-        restaurants_filter = restaurants_filter.sort_values(by=['review_rating_'+aspect], axis=0, ascending=ascending_boolean)
+        restaurants_filter = restaurants_filter.sort_values(by=['review_rating_'+str(aspect).lower()], axis=0, ascending=ascending_boolean)
+
+    # if user has not searched for anything
+    if (n_clicks == None) | (len(restaurants_filter) == len(restaurants_data)):
+        subtitle = "Top restaurants in Singapore"
+        # display top 20 results
+        restaurants_filter = restaurants_filter.iloc[:20]
 
     # generate data
     subtitle_output = [html.H2(subtitle, style={'margin-left': '25px'})]
