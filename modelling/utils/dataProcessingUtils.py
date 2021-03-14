@@ -8,7 +8,12 @@ from nltk.corpus import stopwords
 from gensim.parsing.preprocessing import STOPWORDS
 import string
 
-STOPWORD_SET = STOPWORDS.union(set(stopwords.words("english")))
+STOPWORD_SET = list(STOPWORDS.union(set(stopwords.words("english"))))
+NEGATION_TERMS = ["not", "never", "no", "nothing", "neither", "nowhere", "doesn't", "doesn", "isn't", "isn", \
+                  "wasn", "wasn't", "cant", "can't", "cannot", "shouldn't", "shouldn", "won", "won't", "couldn't", \
+                  "couldn", "couldnt", "don", "don't"]
+STOPWORD_SET = set([word for word in STOPWORD_SET if word not in NEGATION_TERMS])
+
 WORD_TOKENIZER = nltk.WordPunctTokenizer()
 PUNCTUATION_TABLE = str.maketrans(dict.fromkeys(string.punctuation))
 
