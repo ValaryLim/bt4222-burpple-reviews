@@ -3,7 +3,14 @@ import pandas as pd
 import numpy as np 
 import re
 from emot.emo_unicode import UNICODE_EMO, EMOTICONS
+import nltk
+from nltk.corpus import stopwords
+from gensim.parsing.preprocessing import STOPWORDS
+import string
 
+STOPWORD_SET = STOPWORDS.union(set(stopwords.words("english")))
+WORD_TOKENIZER = nltk.WordPunctTokenizer()
+PUNCTUATION_TABLE = str.maketrans(dict.fromkeys(string.punctuation))
 
 CATEGORY_CUISINE_MAPPING = {
     'Burgers': ['Western'], 
@@ -85,6 +92,18 @@ def process_categories(df, category_column="categories"):
             # update new row
             df[actual_category] = updated_row
     return df
+
+def clean_phrase(phrase, remove_whitespace=True, remove_stopwords=True, remove_punctuation=True, remove_nonascii=True):
+    if remove_whitespace:
+        phrase = phrase.strip()
+    if remove_stopwords:
+        phrase = " ".join([word for word in WORD_TOKENIZER.tokenize(phrase) if not word in STOPWORD_SET])
+    if remove_punctuation:
+        phrase = phrase.translate(PUNCTUATION_TABLE)
+    if remove_nonascii:
+        phrase = phrase.encode("ascii", "ignore").decode()
+    phrase = " ".join(phrase.split())
+    return phrase
 
 def one_hot_encode_emojis(df, column):
     phrases = df[column]
