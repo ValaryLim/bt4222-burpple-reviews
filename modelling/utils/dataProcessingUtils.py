@@ -98,7 +98,8 @@ def process_categories(df, category_column="categories"):
             df[actual_category] = updated_row
     return df
 
-def clean_phrase(phrase, remove_whitespace=True, remove_stopwords=True, remove_punctuation=True, remove_nonascii=True):
+def clean_phrase(phrase, remove_whitespace=True, remove_stopwords=True, remove_punctuation=True, remove_nonascii=True,\
+                 remove_single_characters=True, remove_numbers=True):
     if remove_whitespace:
         phrase = phrase.strip()
     if remove_stopwords:
@@ -107,8 +108,13 @@ def clean_phrase(phrase, remove_whitespace=True, remove_stopwords=True, remove_p
         phrase = phrase.translate(PUNCTUATION_TABLE)
     if remove_nonascii:
         phrase = phrase.encode("ascii", "ignore").decode()
+    if remove_single_characters:
+        phrase = " ".join([word for word in phrase.split() if len(word) > 1])
+    if remove_numbers:
+        phrase = "".join([i for i in phrase if not i.isdigit()])
+
     phrase = " ".join(phrase.split())
-    return phrase
+    return phrase.lower()
 
 def one_hot_encode_emojis(df, column):
     phrases = df[column]
