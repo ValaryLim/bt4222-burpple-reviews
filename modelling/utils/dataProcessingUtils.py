@@ -1,9 +1,24 @@
 import ast
-import pandas as pd 
-import numpy as np 
 import re
+import string
+import numpy as np 
+import pandas as pd 
 from emot.emo_unicode import UNICODE_EMO, EMOTICONS
+import nltk
+from nltk.corpus import stopwords
+from gensim.parsing.preprocessing import STOPWORDS
+from nltk.stem import WordNetLemmatizer, PorterStemmer 
 
+STOPWORD_SET = list(STOPWORDS.union(set(stopwords.words("english"))))
+NEGATION_TERMS = ["not", "never", "no", "nothing", "neither", "nowhere", "doesn't", "doesn", "isn't", "isn", \
+                  "wasn", "wasn't", "cant", "can't", "cannot", "shouldn't", "shouldn", "won", "won't", "couldn't", \
+                  "couldn", "couldnt", "don", "don't"]
+STOPWORD_SET = set([word for word in STOPWORD_SET if word not in NEGATION_TERMS])
+
+WORD_TOKENIZER = nltk.WordPunctTokenizer()
+LEMMATIZER = WordNetLemmatizer()
+STEMMER = PorterStemmer()
+PUNCTUATION_TABLE = str.maketrans(dict.fromkeys(string.punctuation))
 
 CATEGORY_CUISINE_MAPPING = {
     'Burgers': ['Western'], 
@@ -85,6 +100,28 @@ def process_categories(df, category_column="categories"):
             # update new row
             df[actual_category] = updated_row
     return df
+
+def clean_phrase(phrase, remove_whitespace=True, remove_stopwords=True, remove_punctuation=True, remove_nonascii=True,\
+                 remove_single_characters=True, remove_numbers=True, lemmatize=False, stem=False):
+    if remove_whitespace:
+        phrase = phrase.strip()
+    if remove_stopwords:
+        phrase = " ".join([word for word in WORD_TOKENIZER.tokenize(phrase) if not word in STOPWORD_SET])
+    if remove_punctuation:
+        phrase = phrase.translate(PUNCTUATION_TABLE)
+    if remove_nonascii:
+        phrase = phrase.encode("ascii", "ignore").decode()
+    if remove_single_characters:
+        phrase = " ".join([word for word in phrase.split() if len(word) > 1])
+    if remove_numbers:
+        phrase = "".join([i for i in phrase if not i.isdigit()])
+    if lemmatize:
+        phrase = " ".join([LEMMATIZER.lemmatize(word) for word in WORD_TOKENIZER.tokenize(phrase)])
+    if stem:
+        phrase = " ".join([STEMMER.stem(word) for word in WORD_TOKENIZER.tokenize(phrase)])
+
+    phrase = " ".join(phrase.split())
+    return phrase.lower()
 
 def one_hot_encode_emojis(df, column):
     phrases = df[column]
