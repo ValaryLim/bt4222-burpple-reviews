@@ -15,7 +15,13 @@ dashboard/utils/__pycache__
 dashboard/__pycache__
 dashboard/apps/__pycache__
 dashboard/utils/__pycache__
+
 modelling/.ipynb_checkpoints
 modelling/utils/__pycache__
+modelling/utils/fasttext
 modelling/dummy_data.py
+modelling/data
+modelling/cache_dir
+modelling/model_results/bert
+
 .ipynb_checkpoints
