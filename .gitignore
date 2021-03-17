@@ -23,5 +23,7 @@ modelling/dummy_data.py
 modelling/data
 modelling/cache_dir
 modelling/model_results/bert
+modelling/model_results/fasttext
+modelling/saved_models
 
 .ipynb_checkpoints
