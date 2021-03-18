@@ -127,7 +127,11 @@ def clean_phrase(phrase, remove_whitespace=True, remove_stopwords=True, remove_p
         phrase = " ".join([LEMMATIZER.lemmatize(word) for word in WORD_TOKENIZER.tokenize(phrase)])
     if stem:
         phrase = " ".join([STEMMER.stem(word) for word in WORD_TOKENIZER.tokenize(phrase)])
-
+    
+    # replace negated terms
+    phrase = re.sub(r"\bnt\b", "not", phrase)
+    phrase = re.sub(r"\bn't\b", "not", phrase)
+    
     phrase = " ".join(phrase.split())
     return phrase.lower()
 
