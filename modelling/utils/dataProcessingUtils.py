@@ -3,8 +3,9 @@ import re
 import string
 import numpy as np 
 import pandas as pd 
-from emot.emo_unicode import UNICODE_EMO, EMOTICONS
 import nltk
+from emot.emo_unicode import UNICODE_EMO
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from nltk.corpus import stopwords
 from gensim.parsing.preprocessing import STOPWORDS
 from nltk.stem import WordNetLemmatizer, PorterStemmer 
@@ -76,7 +77,6 @@ FILTERED_CATEGORIES = ['Italian', 'Malay', 'Japanese', 'Chinese', 'Western', 'Ko
             'Mexican', 'Indian', 'Local Delights', 'Desserts', 'Healthy', 'Cafes & Coffee', 'Halal']
 
 ADDITIONAL_CATEGORIES = ['Beverages', 'Others']
-
 
 def process_csv_lists(df, columns):
     for col in columns:
