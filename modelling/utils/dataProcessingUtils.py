@@ -122,3 +122,43 @@ def clean_phrase(phrase, remove_whitespace=True, remove_stopwords=True, remove_p
 
     phrase = " ".join(phrase.split())
     return phrase.lower()
+
+def process_emojis(df, text_col, text_pos, text_neg):
+    """
+    :df: Dataframe to convert
+    :text_col: Column containing text that we want to replace emojis
+    :text_pos: Text we want to replace positive sentiment emojis with, e.g. emoji_good, good
+    :text_neg: Text we want to replace negative sentiment emojis with, e.g. emoji_bad, bad
+    :returns: Original Dataframe with text_col overwritten
+    """
+    # Get Mapping
+    mapping = get_emoji_sentiment_mapping(UNICODE_EMO, text_pos, text_neg)
+
+    # Get Column
+    phrases = df[text_col]
+    processed_text = []
+
+    for p in phrases:
+        processed_text.append(replace_emojis(p, mapping))
+
+    df[text_col] = processed_text
+    
+    return df
+
+def replace_emojis(text, mapping):
+    for emot in mapping:
+        text = text.replace(emot, ' ' + mapping[emot] + ' ').strip()
+    return " ".join(text.split())
+
+def get_emoji_sentiment_mapping(UNICODE_EMO, text_pos, text_neg):
+    analyser = SentimentIntensityAnalyzer()
+    d = {}
+    for k in UNICODE_EMO:
+        pol = analyser.polarity_scores(k)
+        if pol['neu'] == 1.0:
+            continue
+        elif pol['compound'] > 0.4: 
+            d[k] = text_pos
+        elif pol['compound'] < -0.3:
+            d[k] = text_neg
+    return d
