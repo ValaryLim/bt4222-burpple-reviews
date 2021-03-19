@@ -8,7 +8,7 @@ from emot.emo_unicode import UNICODE_EMO
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from nltk.corpus import stopwords
 from gensim.parsing.preprocessing import STOPWORDS
-from nltk.stem import WordNetLemmatizer, PorterStemmer 
+from nltk.stem import WordNetLemmatizer, PorterStemmer  
 
 STOPWORD_SET = list(STOPWORDS.union(set(stopwords.words("english"))))
 NEGATION_TERMS = ["not", "never", "no", "nothing", "neither", "nowhere", "doesn't", "doesn", "isn't", "isn", \
