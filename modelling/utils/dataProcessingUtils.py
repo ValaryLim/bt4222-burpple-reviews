@@ -122,34 +122,3 @@ def clean_phrase(phrase, remove_whitespace=True, remove_stopwords=True, remove_p
 
     phrase = " ".join(phrase.split())
     return phrase.lower()
-
-def one_hot_encode_emojis(df, column):
-    phrases = df[column]
-  
-    # Find all the emojis in the text
-    emojis = []
-    for p in phrases:
-        emojis_in_phrase = []
-        for char in p:
-            if char in UNICODE_EMO: 
-                string_rep = UNICODE_EMO[char].replace(":","")
-                # do not store duplicate emojis
-                if string_rep not in emojis_in_phrase:
-                    emojis_in_phrase.append(string_rep)
-        emojis.append(emojis_in_phrase)
-
-    # Prepare for one hot encoding 
-    df['emojis'] = emojis
-    values = df.emojis.values 
-    lengths = [len(x) for x in values.tolist()]
-    f, u = pd.factorize(np.concatenate(values))
-    n,m = len(values), u.size
-    i = np.arange(n).repeat(lengths)
-
-    # Create dataframe with dummies
-    dummies = pd.DataFrame(np.bincount(i*m+f, minlength = n*m).reshape(n,m), df.index, u)
-
-    # Append dataframe to original df
-    df = df.drop('emojis', 1).join(dummies)
-
-    return df
