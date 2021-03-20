@@ -20,6 +20,8 @@ WORD_TOKENIZER = nltk.WordPunctTokenizer()
 LEMMATIZER = WordNetLemmatizer()
 STEMMER = PorterStemmer()
 PUNCTUATION_TABLE = str.maketrans(dict.fromkeys(string.punctuation))
+EMOJI_GENERIC_MAPPING = get_emoji_sentiment_mapping(UNICODE_EMO, 'good', 'bad')
+EMOJI_UNIQUE_MAPPING = get_emoji_sentiment_mapping(UNICODE_EMO, 'emoji_good', 'emoji_bad')
 
 CATEGORY_CUISINE_MAPPING = {
     'Burgers': ['Western'], 
@@ -102,7 +104,8 @@ def process_categories(df, category_column="categories"):
     return df
 
 def clean_phrase(phrase, remove_whitespace=True, remove_stopwords=True, remove_punctuation=True, remove_nonascii=True,\
-                 remove_single_characters=True, remove_numbers=True, lemmatize=False, stem=False):
+                 remove_single_characters=True, remove_numbers=True, lemmatize=False, stem=False, convert_emoji_generic=False, \
+                 convert_emoji_unique=False):
     if remove_whitespace:
         phrase = phrase.strip()
     if remove_stopwords:
@@ -119,31 +122,13 @@ def clean_phrase(phrase, remove_whitespace=True, remove_stopwords=True, remove_p
         phrase = " ".join([LEMMATIZER.lemmatize(word) for word in WORD_TOKENIZER.tokenize(phrase)])
     if stem:
         phrase = " ".join([STEMMER.stem(word) for word in WORD_TOKENIZER.tokenize(phrase)])
+    if convert_emoji_generic:
+        phrase = replace_emojis(phrase, EMOJI_GENERIC_MAPPING)
+    if convert_emoji_unique:
+        phrase = replace_emojis(phrase, EMOJI_UNIQUE_MAPPING)
 
     phrase = " ".join(phrase.split())
     return phrase.lower()
-
-def process_emojis(df, text_col, text_pos, text_neg):
-    """
-    :df: Dataframe to convert
-    :text_col: Column containing text that we want to replace emojis
-    :text_pos: Text we want to replace positive sentiment emojis with, e.g. emoji_good, good
-    :text_neg: Text we want to replace negative sentiment emojis with, e.g. emoji_bad, bad
-    :returns: Original Dataframe with text_col overwritten
-    """
-    # Get Mapping
-    mapping = get_emoji_sentiment_mapping(UNICODE_EMO, text_pos, text_neg)
-
-    # Get Column
-    phrases = df[text_col]
-    processed_text = []
-
-    for p in phrases:
-        processed_text.append(replace_emojis(p, mapping))
-
-    df[text_col] = processed_text
-    
-    return df
 
 def replace_emojis(text, mapping):
     for emot in mapping:
