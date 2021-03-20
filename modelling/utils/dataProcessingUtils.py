@@ -20,8 +20,6 @@ WORD_TOKENIZER = nltk.WordPunctTokenizer()
 LEMMATIZER = WordNetLemmatizer()
 STEMMER = PorterStemmer()
 PUNCTUATION_TABLE = str.maketrans(dict.fromkeys(string.punctuation))
-EMOJI_GENERIC_MAPPING = get_emoji_sentiment_mapping(UNICODE_EMO, 'good', 'bad')
-EMOJI_UNIQUE_MAPPING = get_emoji_sentiment_mapping(UNICODE_EMO, 'emoji_good', 'emoji_bad')
 
 CATEGORY_CUISINE_MAPPING = {
     'Burgers': ['Western'], 
@@ -103,7 +101,23 @@ def process_categories(df, category_column="categories"):
             df[actual_category] = updated_row
     return df
 
-def clean_phrase(phrase, remove_whitespace=True, remove_stopwords=True, remove_punctuation=True, remove_nonascii=True,\
+def get_emoji_sentiment_mapping(UNICODE_EMO, text_pos, text_neg):
+    analyser = SentimentIntensityAnalyzer()
+    d = {}
+    for k in UNICODE_EMO:
+        pol = analyser.polarity_scores(k)
+        if pol['neu'] == 1.0:
+            continue
+        elif pol['compound'] > 0.4: 
+            d[k] = text_pos
+        elif pol['compound'] < -0.3:
+            d[k] = text_neg
+    return d
+
+EMOJI_GENERIC_MAPPING = get_emoji_sentiment_mapping(UNICODE_EMO, 'good', 'bad')
+EMOJI_UNIQUE_MAPPING = get_emoji_sentiment_mapping(UNICODE_EMO, 'emoji_good', 'emoji_bad')
+
+def clean_phrase(phrase, remove_whitespace=True, remove_stopwords=True, remove_punctuation=True, remove_nonascii=True, \
                  remove_single_characters=True, remove_numbers=True, lemmatize=False, stem=False, convert_emoji_generic=False, \
                  convert_emoji_unique=False):
     if convert_emoji_generic:
@@ -134,16 +148,3 @@ def replace_emojis(text, mapping):
     for emot in mapping:
         text = text.replace(emot, ' ' + mapping[emot] + ' ').strip()
     return " ".join(text.split())
-
-def get_emoji_sentiment_mapping(UNICODE_EMO, text_pos, text_neg):
-    analyser = SentimentIntensityAnalyzer()
-    d = {}
-    for k in UNICODE_EMO:
-        pol = analyser.polarity_scores(k)
-        if pol['neu'] == 1.0:
-            continue
-        elif pol['compound'] > 0.4: 
-            d[k] = text_pos
-        elif pol['compound'] < -0.3:
-            d[k] = text_neg
-    return d
