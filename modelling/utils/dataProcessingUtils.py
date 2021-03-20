@@ -126,7 +126,7 @@ def clean_phrase(phrase, remove_whitespace=True, remove_stopwords=True, remove_p
         phrase = " ".join([LEMMATIZER.lemmatize(word) for word in WORD_TOKENIZER.tokenize(phrase)])
     if stem:
         phrase = " ".join([STEMMER.stem(word) for word in WORD_TOKENIZER.tokenize(phrase)])
-
+        
     phrase = " ".join(phrase.split())
     return phrase.lower()
 
