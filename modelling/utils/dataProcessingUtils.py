@@ -3,8 +3,9 @@ import re
 import string
 import numpy as np 
 import pandas as pd 
-from emot.emo_unicode import UNICODE_EMO, EMOTICONS
 import nltk
+from emot.emo_unicode import UNICODE_EMO
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from nltk.corpus import stopwords
 from gensim.parsing.preprocessing import STOPWORDS
 from nltk.stem import WordNetLemmatizer, PorterStemmer 
@@ -77,7 +78,6 @@ FILTERED_CATEGORIES = ['Italian', 'Malay', 'Japanese', 'Chinese', 'Western', 'Ko
 
 ADDITIONAL_CATEGORIES = ['Beverages', 'Others']
 
-
 def process_csv_lists(df, columns):
     for col in columns:
         df[col] = df[col].apply(lambda x: ast.literal_eval(x))
@@ -123,33 +123,42 @@ def clean_phrase(phrase, remove_whitespace=True, remove_stopwords=True, remove_p
     phrase = " ".join(phrase.split())
     return phrase.lower()
 
-def one_hot_encode_emojis(df, column):
-    phrases = df[column]
-  
-    # Find all the emojis in the text
-    emojis = []
+def process_emojis(df, text_col, text_pos, text_neg):
+    """
+    :df: Dataframe to convert
+    :text_col: Column containing text that we want to replace emojis
+    :text_pos: Text we want to replace positive sentiment emojis with, e.g. emoji_good, good
+    :text_neg: Text we want to replace negative sentiment emojis with, e.g. emoji_bad, bad
+    :returns: Original Dataframe with text_col overwritten
+    """
+    # Get Mapping
+    mapping = get_emoji_sentiment_mapping(UNICODE_EMO, text_pos, text_neg)
+
+    # Get Column
+    phrases = df[text_col]
+    processed_text = []
+
     for p in phrases:
-        emojis_in_phrase = []
-        for char in p:
-            if char in UNICODE_EMO: 
-                string_rep = UNICODE_EMO[char].replace(":","")
-                # do not store duplicate emojis
-                if string_rep not in emojis_in_phrase:
-                    emojis_in_phrase.append(string_rep)
-        emojis.append(emojis_in_phrase)
+        processed_text.append(replace_emojis(p, mapping))
 
-    # Prepare for one hot encoding 
-    df['emojis'] = emojis
-    values = df.emojis.values 
-    lengths = [len(x) for x in values.tolist()]
-    f, u = pd.factorize(np.concatenate(values))
-    n,m = len(values), u.size
-    i = np.arange(n).repeat(lengths)
-
-    # Create dataframe with dummies
-    dummies = pd.DataFrame(np.bincount(i*m+f, minlength = n*m).reshape(n,m), df.index, u)
-
-    # Append dataframe to original df
-    df = df.drop('emojis', 1).join(dummies)
-
+    df[text_col] = processed_text
+    
     return df
+
+def replace_emojis(text, mapping):
+    for emot in mapping:
+        text = text.replace(emot, ' ' + mapping[emot] + ' ').strip()
+    return " ".join(text.split())
+
+def get_emoji_sentiment_mapping(UNICODE_EMO, text_pos, text_neg):
+    analyser = SentimentIntensityAnalyzer()
+    d = {}
+    for k in UNICODE_EMO:
+        pol = analyser.polarity_scores(k)
+        if pol['neu'] == 1.0:
+            continue
+        elif pol['compound'] > 0.4: 
+            d[k] = text_pos
+        elif pol['compound'] < -0.3:
+            d[k] = text_neg
+    return d
