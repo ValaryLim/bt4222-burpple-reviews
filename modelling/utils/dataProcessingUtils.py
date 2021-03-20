@@ -106,6 +106,10 @@ def process_categories(df, category_column="categories"):
 def clean_phrase(phrase, remove_whitespace=True, remove_stopwords=True, remove_punctuation=True, remove_nonascii=True,\
                  remove_single_characters=True, remove_numbers=True, lemmatize=False, stem=False, convert_emoji_generic=False, \
                  convert_emoji_unique=False):
+    if convert_emoji_generic:
+        phrase = replace_emojis(phrase, EMOJI_GENERIC_MAPPING)
+    if convert_emoji_unique:
+        phrase = replace_emojis(phrase, EMOJI_UNIQUE_MAPPING)
     if remove_whitespace:
         phrase = phrase.strip()
     if remove_stopwords:
@@ -122,10 +126,6 @@ def clean_phrase(phrase, remove_whitespace=True, remove_stopwords=True, remove_p
         phrase = " ".join([LEMMATIZER.lemmatize(word) for word in WORD_TOKENIZER.tokenize(phrase)])
     if stem:
         phrase = " ".join([STEMMER.stem(word) for word in WORD_TOKENIZER.tokenize(phrase)])
-    if convert_emoji_generic:
-        phrase = replace_emojis(phrase, EMOJI_GENERIC_MAPPING)
-    if convert_emoji_unique:
-        phrase = replace_emojis(phrase, EMOJI_UNIQUE_MAPPING)
 
     phrase = " ".join(phrase.split())
     return phrase.lower()
