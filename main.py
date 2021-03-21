@@ -19,22 +19,22 @@ RESTAURANT_FINAL = "data/pipeline/restaurant_final.csv"
 
 if __name__ == "__main__":
     # scrape
-    scraping.scraping_pipeline("hello")
+    scraping.scraping_pipeline("hello") # SEAN 
     
     # preprocessing
-    utils.preprocessing_pipeline(REVIEW_CSV, PREPROCESSED_CSV)
+    utils.preprocessing_pipeline(REVIEW_CSV, PREPROCESSED_CSV) # RISA 
 
     # RULE MINING
-    utils.rule_mining_pipeline(PREPROCESSED_CSV, RULE_MINED_CSV)
+    utils.rule_mining_pipeline(PREPROCESSED_CSV, RULE_MINED_CSV) # RISA
 
     # postprocessing
-    utils.postprocessing_pipeline(RULE_MINED_CSV, POSTPROCESSED_CSV)
+    utils.postprocessing_pipeline(RULE_MINED_CSV, POSTPROCESSED_CSV) # RISA & XM 
 
     # MODELLING
-    modelling.base_modelling_pipeline(POSTPROCESSED_CSV, PREDICTIONS_CSV)
-    modelling.meta_modelling_pipeline(PREDICTIONS_CSV, ENSEMBLE_CSV)
+    modelling.base_modelling_pipeline(POSTPROCESSED_CSV, PREDICTIONS_CSV) # SEAN, VAL, YJ, XM
+    modelling.meta_modelling_pipeline(PREDICTIONS_CSV, ENSEMBLE_CSV) # XM
 
     # SCORING
-    utils.scoring_pipeline(ENSEMBLE_CSV, RESTAURANT_CSV, REVIEW_FINAl, RESTAURANT_FINAL)
+    utils.scoring_pipeline(ENSEMBLE_CSV, RESTAURANT_CSV, REVIEW_FINAl, RESTAURANT_FINAL) # VAL, YJ
 
     ##### dashboard to read data from SCORING_DIR
