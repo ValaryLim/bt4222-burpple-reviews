@@ -1,5 +1,4 @@
 import os
-import utils
 import requests
 import datetime
 import time
@@ -9,14 +8,14 @@ from bs4 import BeautifulSoup
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
-
+from .scrapingUtils import *
 
 RESTAURANT_OFFSET_INCREMENT = 12
 REVIEW_OFFSET_INCREMENT = 20
 
 def scrape_neighbourhoods(browser):
     # retrieve html
-    neighbourhood_soup = utils.load_url("https://www.burpple.com/neighbourhoods/sg", browser)
+    neighbourhood_soup = load_url("https://www.burpple.com/neighbourhoods/sg", browser)
 
     # retrieve list of neighbourhoods
     neighbourhood_refs = []
@@ -290,6 +289,16 @@ def generate_restaurant_details(restaurant_csv, browser):
         "restaurant_photo": photos
     })
     return restaurant_description_df
+
+def scraping_pipeline(DIR):
+    '''
+    Runs through entire scraping pipeline and saves files according to directory input
+    Parameters:
+
+    Returns: None
+    '''
+    print("scraping pipeline called")
+    return 
 
 if __name__ == "__main__":
     # instantiate directories

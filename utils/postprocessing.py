@@ -1,6 +1,7 @@
 import ast
 import re
 import string
+import utils
 import numpy as np 
 import pandas as pd 
 from emot.emo_unicode import UNICODE_EMO, EMOTICONS
@@ -8,8 +9,6 @@ import nltk
 from nltk.corpus import stopwords
 from gensim.parsing.preprocessing import STOPWORDS
 from nltk.stem import WordNetLemmatizer, PorterStemmer 
-
-from rules import get_pos
 
 STOPWORD_SET = list(STOPWORDS.union(set(stopwords.words("english"))))
 NEGATION_TERMS = ["not", "never", "no", "nothing", "neither", "nowhere", "doesn't", "doesn", "isn't", "isn", \
@@ -112,7 +111,7 @@ def clean_phrase(phrase, remove_whitespace=True, remove_stopwords=True, remove_p
     if remove_punctuation:
         phrase = phrase.translate(PUNCTUATION_TABLE)
     if remove_nouns:
-        pos_df = get_pos(phrase)
+        pos_df = utils.get_pos(phrase)
         nouns = list(pos_df.loc[pos_df['pos']=='NOUN']['text'])
         word_tokens = word_tokenize(phrase)
         new_phrase_list = [w for w in word_tokens if not w in nouns]

@@ -2,57 +2,32 @@
 ### packages ###
 ################
 import utils
+import scraping
 
-################
-### scraping ###
-################
+# PATH DEFINITIONS
+SCRAPED_DATA = "data/pipeline/scraped/"
+PREPROCESSED_DATA = "data/pipeline/preprocesed/"
+RULE_MINING_DATA = "data/pipeline/rule_mining/"
+POSTPROCESSED_DATA = "data/pipeline/postprocessed/"
+MODEL_PREDICTIONS_DATA = "data/pipeline/model_predictions/"
+SCORING_DATA = "data/pipeline/scored/"
 
+if __name__ == "__main__":
+    # scrape
+    scraping.scraping_pipeline("hello")
+    
+    # preprocessing
+    utils.preprocessing_pipeline(review_file, save_file)
 
-#####################
-### preprocessing ###
-#####################
-'''
-Function Name: clean_review
-Description: remove numbers, empty strings, new lines from phrases
-Input: string
-Output: string
-'''
-df['review_title'] = df['review_title'].apply(lambda x: clean_review(x))
-df['review_body'] = df['review_body'].apply(lambda x: clean_review(x))
-print("preprocessing done")
+    # RULE MINING
 
-###################
-### rule mining ###
-###################
-'''
-Function Name: process_reviews
-Description: generate aspects through rule mining
-Input: dataframe, string
-Output: dataframe
-'''
-df = process_reviews(df, df_path)
-print("rule mining done")
+    # postprocessing
+    utils.postprocessing_pipeline()
 
-######################
-### postprocessing ###
-######################
-'''
-Function Name: 
-Description: 
-Input: 
-Output:
-'''
-print("postprocessing done")
+    # MODELLING
+    modelling.modelling_pipeline()
 
-################
-### modeling ###
-################
-'''
-Function Name: 
-Description: 
-Input: 
-Output:
-'''
+    # SCORING
+    utils.scoring_pipeline()
 
-
-print("postprocessing done")
+    # DASHBOARD DATA UPDATE

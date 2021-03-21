@@ -5,21 +5,22 @@ import numpy as np
 import ast
 import os
 import en_core_web_sm
-nlp = en_core_web_sm.load()
 import re
 import nltk
 from nltk.corpus import stopwords
-nltk.download('punkt')
 from nltk.tokenize import word_tokenize  
 import string
 from string import digits
 
-'''
-description: get the unique synonyms for each aspect 
-input: dataframe
-output: dataframe (saved as csv)
-'''
-def get_all_aspects(df) :
+nlp = en_core_web_sm.load()
+nltk.download('punkt')
+
+def get_all_aspects(df):
+    '''
+    description: get the unique synonyms for each aspect 
+    input: dataframe
+    output: dataframe (saved as csv)
+    '''
     food = []
     time = []
     price = []
@@ -77,12 +78,12 @@ def get_all_aspects(df) :
     ambience_df.to_csv("./aspects/ambience.csv", index=False)
     print("dataframes saved")
 
-'''
-description: get the text, pos and tag of each word
-input: text
-output: dataframe
-'''
 def get_pos(review) :
+    '''
+    description: get the text, pos and tag of each word
+    input: text
+    output: dataframe
+    '''
     text = []
     pos = []
     tag = []
@@ -94,12 +95,12 @@ def get_pos(review) :
     pos_df = pd.DataFrame({'text': text, 'pos': pos, 'tag': tag})
     return pos_df
 
-'''
-description: get aspects
-input: string, list
-output: list, list
-'''
-def get_aspects(review, pos_df, aspect_list) :
+def get_aspects(review, pos_df, aspect_list):
+    '''
+    description: get aspects
+    input: string, list
+    output: list, list
+    '''
     # get aspects present in review
     aspects = list(pos_df.loc[pos_df['text'].isin(aspect_list)]['text'])
     # get sentences with aspects
@@ -111,23 +112,23 @@ def get_aspects(review, pos_df, aspect_list) :
             aspect_sentences.append(sentences[i])
     return aspects, aspect_sentences
 
-'''
-description: get the ranges
-input: list
-output: list
-'''
 def ranges(nums):
+    '''
+    description: get the ranges
+    input: list
+    output: list
+    '''
     nums = sorted(set(nums))
     gaps = [[s, e] for s, e in zip(nums, nums[1:]) if s+1 < e]
     edges = iter(nums[:1] + sum(gaps, []) + nums[-1:])
     return list(zip(edges, edges))
 
-'''
-description: get the text where first word is target_pos and last word is aspect and vice versa
-input: dataframe, list, str
-output: list
-'''
 def pos_before_after_aspect(pos_df, aspect_list, target_pos) :
+    '''
+    description: get the text where first word is target_pos and last word is aspect and vice versa
+    input: dataframe, list, str
+    output: list
+    '''
     start, end = 0, 0
     sentences = []
     positions_start = []
@@ -181,12 +182,12 @@ def pos_before_after_aspect(pos_df, aspect_list, target_pos) :
                 filtered.append(review)
     return filtered
 
-'''
-description: get the start and end indexes of the sentence
-input: string, dataframe
-output: dataframe
-'''
 def get_sentence_indexes(sentence, pos_df) :
+    '''
+    description: get the start and end indexes of the sentence
+    input: string, dataframe
+    output: dataframe
+    '''
     sentence_split = sentence.split(" ")
     target_pos = pos_df.loc[pos_df['text'].isin(sentence_split)]
     target_index = list(target_pos.index)
@@ -204,12 +205,12 @@ def get_sentences_indexes(sentence, pos_df) :
         all_indexes = pd.concat([all_indexes, pos_df_target])
     return all_indexes
         
-'''
-description: get the sentences from indexes
-input: dataframe, dataframe
-output: list
-'''
 def get_sentences(pos_df, pos_df_original) :
+    '''
+    description: get the sentences from indexes
+    input: dataframe, dataframe
+    output: list
+    '''
     pos_df_phrases = []
     pos_df_index = list(pos_df.index)
     ranges_list = ranges(pos_df_index)
@@ -220,12 +221,12 @@ def get_sentences(pos_df, pos_df_original) :
             pos_df_phrases.append(pos_df_original['text'][start:end].apply(lambda x:x + ' ').sum())
     return pos_df_phrases
 
-'''
-description: apply functions to aspect
-input: str, dataframe, list
-output: list
-'''
 def process_review_aspect(review, pos_df, aspect_list, to_remove) :
+    '''
+    description: apply functions to aspect
+    input: str, dataframe, list
+    output: list
+    '''
     aspects, sentence = get_aspects(review, pos_df, aspect_list)
     sentence_new = pos_before_after_aspect(pos_df, aspects, 'ADJ')
     aspect_pos = get_sentences_indexes(sentence_new, pos_df)
@@ -234,12 +235,12 @@ def process_review_aspect(review, pos_df, aspect_list, to_remove) :
     phrase_list_cleaned = post_processing(phrase_list, to_remove)
     return phrase_list_cleaned
 
-'''
-description: add phrase_no_noun and phrase_no_aspect
-input: dataframe, list
-output: dataframe
-'''
 def add_phrases(df, all_aspects) :
+    '''
+    description: add phrase_no_noun and phrase_no_aspect
+    input: dataframe, list
+    output: dataframe
+    '''
     new_phrase_no_aspect = []
     new_phrase_no_noun = []
     for i in range(0, len(df)) :
@@ -257,13 +258,12 @@ def add_phrases(df, all_aspects) :
     df['phrase_no_noun'] = new_phrase_no_noun
     return df
 
-'''
-description: apply functions to review
-input: path to dataframe
-output: dataframe
-'''
 def process_reviews(df, df_path, to_save) :
-    
+    '''
+    description: apply functions to review
+    input: path to dataframe
+    output: dataframe
+    '''
     # for post-processing
     stop_words_to_remove = set(stopwords.words('english'))
     # negated terms to not remove
