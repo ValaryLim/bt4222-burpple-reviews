@@ -1,4 +1,4 @@
-Unnamed: 0,restaurant_code,review_title,review_body,account_name,account_id,aspect,phrase,phrase_no_aspect,phrase_no_noun,label,new_aspect_1,new_aspect_2
+Unnamed: 0,restaurant_code,review_title,review_body,account_name,account_id,aspect,phrase,phrase_no_aspect,phrase_no_noun,label,new_aspect1,new_aspect2
 0,Mar-03,What's Marché Without Rösti,I wonder how they nv overcooked their rösti...,Raine Liu,@rainraineeataway,food,"nv, overcooked, rösti","['nv', 'overcooked']","['nv', 'overcooked']",1,food,food
 1,the-rabbit-stash,Degustation,Not bad taste but overpriced,Kevin Lim,@45880,food,"bad, taste",['bad'],"['bad', 'taste']",-1,food,food
 2,workspace,Almond croissant $3.80,"Got very disappointed with the almond croissant $3.80 @workspaceespresso newly opened eatery in Velocity Novena

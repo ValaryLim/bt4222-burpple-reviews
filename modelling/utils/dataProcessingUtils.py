@@ -3,11 +3,12 @@ import re
 import string
 import numpy as np 
 import pandas as pd 
-from emot.emo_unicode import UNICODE_EMO, EMOTICONS
 import nltk
+from emot.emo_unicode import UNICODE_EMO
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from nltk.corpus import stopwords
 from gensim.parsing.preprocessing import STOPWORDS
-from nltk.stem import WordNetLemmatizer, PorterStemmer 
+from nltk.stem import WordNetLemmatizer, PorterStemmer  
 
 STOPWORD_SET = list(STOPWORDS.union(set(stopwords.words("english"))))
 NEGATION_TERMS = ["not", "never", "no", "nothing", "neither", "nowhere", "doesn't", "doesn", "isn't", "isn", \
@@ -77,7 +78,6 @@ FILTERED_CATEGORIES = ['Italian', 'Malay', 'Japanese', 'Chinese', 'Western', 'Ko
 
 ADDITIONAL_CATEGORIES = ['Beverages', 'Others']
 
-
 def process_csv_lists(df, columns):
     for col in columns:
         df[col] = df[col].apply(lambda x: ast.literal_eval(x))
@@ -101,8 +101,29 @@ def process_categories(df, category_column="categories"):
             df[actual_category] = updated_row
     return df
 
-def clean_phrase(phrase, remove_whitespace=True, remove_stopwords=True, remove_punctuation=True, remove_nonascii=True,\
-                 remove_single_characters=True, remove_numbers=True, lemmatize=False, stem=False):
+def get_emoji_sentiment_mapping(UNICODE_EMO, text_pos, text_neg):
+    analyser = SentimentIntensityAnalyzer()
+    d = {}
+    for k in UNICODE_EMO:
+        pol = analyser.polarity_scores(k)
+        if pol['neu'] == 1.0:
+            continue
+        elif pol['compound'] > 0.4: 
+            d[k] = text_pos
+        elif pol['compound'] < -0.3:
+            d[k] = text_neg
+    return d
+
+EMOJI_GENERIC_MAPPING = get_emoji_sentiment_mapping(UNICODE_EMO, 'good', 'bad')
+EMOJI_UNIQUE_MAPPING = get_emoji_sentiment_mapping(UNICODE_EMO, 'emoji_good', 'emoji_bad')
+
+def clean_phrase(phrase, remove_whitespace=True, remove_stopwords=True, remove_punctuation=True, remove_nonascii=True, \
+                 remove_single_characters=True, remove_numbers=True, lemmatize=False, stem=False, convert_emoji_generic=False, \
+                 convert_emoji_unique=False):
+    if convert_emoji_generic:
+        phrase = replace_emojis(phrase, EMOJI_GENERIC_MAPPING)
+    if convert_emoji_unique:
+        phrase = replace_emojis(phrase, EMOJI_UNIQUE_MAPPING)
     if remove_whitespace:
         phrase = phrase.strip()
     if remove_stopwords:
@@ -119,37 +140,11 @@ def clean_phrase(phrase, remove_whitespace=True, remove_stopwords=True, remove_p
         phrase = " ".join([LEMMATIZER.lemmatize(word) for word in WORD_TOKENIZER.tokenize(phrase)])
     if stem:
         phrase = " ".join([STEMMER.stem(word) for word in WORD_TOKENIZER.tokenize(phrase)])
-
+        
     phrase = " ".join(phrase.split())
     return phrase.lower()
 
-def one_hot_encode_emojis(df, column):
-    phrases = df[column]
-  
-    # Find all the emojis in the text
-    emojis = []
-    for p in phrases:
-        emojis_in_phrase = []
-        for char in p:
-            if char in UNICODE_EMO: 
-                string_rep = UNICODE_EMO[char].replace(":","")
-                # do not store duplicate emojis
-                if string_rep not in emojis_in_phrase:
-                    emojis_in_phrase.append(string_rep)
-        emojis.append(emojis_in_phrase)
-
-    # Prepare for one hot encoding 
-    df['emojis'] = emojis
-    values = df.emojis.values 
-    lengths = [len(x) for x in values.tolist()]
-    f, u = pd.factorize(np.concatenate(values))
-    n,m = len(values), u.size
-    i = np.arange(n).repeat(lengths)
-
-    # Create dataframe with dummies
-    dummies = pd.DataFrame(np.bincount(i*m+f, minlength = n*m).reshape(n,m), df.index, u)
-
-    # Append dataframe to original df
-    df = df.drop('emojis', 1).join(dummies)
-
-    return df
+def replace_emojis(text, mapping):
+    for emot in mapping:
+        text = text.replace(emot, ' ' + mapping[emot] + ' ').strip()
+    return " ".join(text.split())

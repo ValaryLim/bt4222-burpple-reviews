@@ -200,7 +200,7 @@ order_input = html.Div([
 layout = html.Div([
     header,
     dbc.Row([dbc.Col(html.H3(id='subtitle-output', style={'margin-left': '20px', 'margin-top': '20px'})), 
-             aspect_input, order_input], justify='end', style={'margin-right': '20px', 'margin-top': '20px'}),
+             aspect_input, order_input], justify='end', style={'margin-right': '20px', 'margin-top': '20px', 'padding-top': '100px'}),
     html.Div(id='restaurants-output', style=CONTENT_STYLE)
 ])
 
