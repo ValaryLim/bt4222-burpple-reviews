@@ -39,7 +39,7 @@ def scrape_restaurants_by_neighbourhood(neighbourhood, browser):
         url = requests.get("https://www.burpple.com/search/sg", params=params).url
         
         # retrieve html
-        soup = utils.load_url(url, browser)
+        soup = load_url(url, browser)
         
         # retrieve venues
         venues = soup.findAll("div", {"class": "searchVenue card feed-item"})
@@ -119,7 +119,7 @@ def scrape_reviews_by_restaurant(restaurant_code, browser):
         review_url = requests.get("https://www.burpple.com/" + restaurant_code + "/reviews", params=params).url
 
         # retrieve html
-        review_soup = utils.load_url(review_url, browser)
+        review_soup = load_url(review_url, browser)
         
         # retrieve reviews
         reviews = review_soup.findAll("div", {"class": "food card feed-item"})
@@ -130,7 +130,7 @@ def scrape_reviews_by_restaurant(restaurant_code, browser):
         for review in reviews:
             try: # essential information
                 title = review.find("div", "food-description-title").text
-                date = utils.format_review_date(review.find("div", "card-item-set--link-subtitle").text.split("\n")[1])
+                date = format_review_date(review.find("div", "card-item-set--link-subtitle").text.split("\n")[1])
                 
                 if date < last_month: # check for reviews that were posted in the last_month only
                     continue
@@ -194,7 +194,7 @@ def generate_restaurants(restaurant_list_dir, browser):
     neighbourhoods = scrape_neighbourhoods(browser)
 
     # format neighbourhoods 
-    neighbourhoods_formatted = utils.format_search_terms(neighbourhoods)
+    neighbourhoods_formatted = format_search_terms(neighbourhoods)
 
     # retrieve and save restaurants to csv
     for n in neighbourhoods:
@@ -318,16 +318,17 @@ if __name__ == "__main__":
         # generate restaurants
         generate_restaurants(restaurant_list_dir=RESTAURANT_LIST_DIR, browser=browser)
         # compile restaurants 
-        utils.compile(raw_dir=RESTAURANT_LIST_DIR, compiled_dir=RESTAURANT_CSV)
+        compile(raw_dir=RESTAURANT_LIST_DIR, compiled_dir=RESTAURANT_CSV)
 
         # generate restaurant details
         restaurant_description_df = generate_restaurant_details(restaurant_csv=RESTAURANT_CSV, browser=browser)
         restaurant_df = pd.read_csv(RESTAURANT_CSV)
         restaurant_detailed_df = restaurant_df.merge(restaurant_description_df, on="restaurant_code", how="left")
         restaurant_detailed_df.to_csv(RESTAURANT_DETAILED_CSV, index=False)
+        # PROCESS CATEGORIES HERE!!!!!!!!
 
         # generate reviews
         # generate_reviews(restaurant_csv=RESTAURANT_CSV, restaurant_reviews_dir=RESTAURANT_REVIEWS_DIR, browser=browser)
 
         # compile restaurants 
-        utils.compile(raw_dir=RESTAURANT_REVIEWS_DIR, compiled_dir=REVIEWS_CSV)
+        compile(raw_dir=RESTAURANT_REVIEWS_DIR, compiled_dir=REVIEWS_CSV)

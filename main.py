@@ -3,31 +3,38 @@
 ################
 import utils
 import scraping
+import modelling
 
 # PATH DEFINITIONS
-SCRAPED_DATA = "data/pipeline/scraped/"
-PREPROCESSED_DATA = "data/pipeline/preprocesed/"
-RULE_MINING_DATA = "data/pipeline/rule_mining/"
-POSTPROCESSED_DATA = "data/pipeline/postprocessed/"
-MODEL_PREDICTIONS_DATA = "data/pipeline/model_predictions/"
-SCORING_DATA = "data/pipeline/scored/"
+SCRAPED_DIR = "data/pipeline/scraped/"
+REVIEW_CSV = SCRAPED_DIR + "reviews.csv"
+RESTAURANT_CSV = SCRAPED_DIR + "restaurants.csv"
+PREPROCESSED_CSV = "data/pipeline/reviews_preprocessed.csv"
+RULE_MINED_CSV = "data/pipeline/rule_mined.csv"
+POSTPROCESSED_CSV = "data/pipeline/reviews_postprocessed.csv"
+PREDICTIONS_CSV = "data/pipeline/baseline_prediction.csv"
+ENSEMBLE_CSV = "data/pipeline/ensemble_prediction.csv"
+REVIEW_FINAL = "data/pipeline/reviews_final.csv"
+RESTAURANT_FINAL = "data/pipeline/restaurant_final.csv"
 
 if __name__ == "__main__":
     # scrape
     scraping.scraping_pipeline("hello")
     
     # preprocessing
-    utils.preprocessing_pipeline(review_file, save_file)
+    utils.preprocessing_pipeline(REVIEW_CSV, PREPROCESSED_CSV)
 
     # RULE MINING
+    utils.rule_mining_pipeline(PREPROCESSED_CSV, RULE_MINED_CSV)
 
     # postprocessing
-    utils.postprocessing_pipeline()
+    utils.postprocessing_pipeline(RULE_MINED_CSV, POSTPROCESSED_CSV)
 
     # MODELLING
-    modelling.modelling_pipeline()
+    modelling.base_modelling_pipeline(POSTPROCESSED_CSV, PREDICTIONS_CSV)
+    modelling.meta_modelling_pipeline(PREDICTIONS_CSV, ENSEMBLE_CSV)
 
     # SCORING
-    utils.scoring_pipeline()
+    utils.scoring_pipeline(ENSEMBLE_CSV, RESTAURANT_CSV, REVIEW_FINAl, RESTAURANT_FINAL)
 
-    # DASHBOARD DATA UPDATE
+    ##### dashboard to read data from SCORING_DIR

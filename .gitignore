@@ -17,4 +17,6 @@ modelling/data
 modelling/cache_dir
 modelling/model_results/bert
 modelling/model_results/fasttext
-modelling/saved_models
+modelling/new_labels
+modelling/old_labels
+modelling/fold_labels

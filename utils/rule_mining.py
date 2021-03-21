@@ -258,11 +258,9 @@ def add_phrases(df, all_aspects) :
     df['phrase_no_noun'] = new_phrase_no_noun
     return df
 
-def process_reviews(df, df_path, to_save) :
+def rule_mining_pipeline(preprocessed_csv, rule_mined_csv) :
     '''
-    description: apply functions to review
-    input: path to dataframe
-    output: dataframe
+    Reads preprocessed csv and outputs new csv with reviews split into aspects
     '''
     # for post-processing
     stop_words_to_remove = set(stopwords.words('english'))
@@ -273,7 +271,7 @@ def process_reviews(df, df_path, to_save) :
     punctuations = list(string.punctuation)
     to_remove = stop_words + punctuations + ["'s"]
     
-    # df = pd.read_csv(df_path)
+    df = pd.read_csv(preprocessed_csv)
     
     food_phrases = []
     time_phrases = []
@@ -375,11 +373,5 @@ def process_reviews(df, df_path, to_save) :
     # add phrase_no_noun and phrase_no_aspect
     # output = add_phrases(output, all_aspects)
     
-    if to_save:
-        # save as csv
-        path_split = df_path.split("/")
-        new_path = "/".join(path_split[:-1]) + "/unlabelled/unlabelled_" + path_split[-1]
-        output.to_csv(new_path)
-        print("saved to", new_path)
-    
-    return output
+    # save as csv
+    output.to_csv(rule_mined_csv, index=False)

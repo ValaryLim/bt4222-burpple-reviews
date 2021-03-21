@@ -18,11 +18,11 @@ def clean_review(review) :
     review = review.replace('\n', ' ')
     return review
 
-def preprocessing_pipeline(review_file, save_file):
+def preprocessing_pipeline(review_file, preprocessed_csv):
     '''
     Runs preprocessing on review_file
     '''
     review_df = pd.read_csv(review_file)
     review_df["review_title"] = review_df["review_title"].apply(lambda x: clean_review(x))
     review_df["review_body"] = review_df["review_body"].apply(lambda x: clean_review(x))
-    review_df.to_csv(save_file, index=False)
+    review_df.to_csv(preprocessed_csv, index=False)
