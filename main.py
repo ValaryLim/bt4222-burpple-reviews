@@ -6,9 +6,9 @@ import scraping
 import modelling
 
 # PATH DEFINITIONS
-SCRAPED_DIR = "data/pipeline/scraped/"
-REVIEW_CSV = SCRAPED_DIR + "reviews.csv"
-RESTAURANT_CSV = SCRAPED_DIR + "restaurants.csv"
+RESTAURANT_CSV = "data/pipeline/restaurants.csv"
+RESTAURANT_DETAILED_CSV = "data/pipeline/restaurants_detailed.csv"
+REVIEW_CSV = "data/pipeline/reviews.csv"
 PREPROCESSED_CSV = "data/pipeline/reviews_preprocessed.csv"
 RULE_MINED_CSV = "data/pipeline/rule_mined.csv"
 POSTPROCESSED_CSV = "data/pipeline/reviews_postprocessed.csv"
@@ -19,7 +19,7 @@ RESTAURANT_FINAL = "data/pipeline/restaurant_final.csv"
 
 if __name__ == "__main__":
     # scrape
-    scraping.scraping_pipeline("hello") # SEAN 
+    scraping.scraping_pipeline(RESTAURANT_CSV, RESTAURANT_DETAILED_CSV, REVIEW_CSV) # SEAN 
     
     # preprocessing
     utils.preprocessing_pipeline(REVIEW_CSV, PREPROCESSED_CSV) # RISA 
@@ -35,6 +35,6 @@ if __name__ == "__main__":
     modelling.meta_modelling_pipeline(PREDICTIONS_CSV, ENSEMBLE_CSV) # XM
 
     # SCORING
-    utils.scoring_pipeline(ENSEMBLE_CSV, RESTAURANT_CSV, REVIEW_FINAl, RESTAURANT_FINAL) # VAL, YJ
+    utils.scoring_pipeline(ENSEMBLE_CSV, RESTAURANT_DETAILED_CSV, REVIEW_FINAl, RESTAURANT_FINAL) # VAL, YJ
 
     ##### dashboard to read data from SCORING_DIR

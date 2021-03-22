@@ -23,7 +23,7 @@ def base_modelling_pipeline(processed_csv, prediction_csv):
     # SUPPORT VECTOR MACHINE PREDICTION
 
 
-    # NAIVE BAYEs PREDICTION
+    # NAIVE BAYES PREDICTION
 
 
     # RANDOM FOREST PREDICTION

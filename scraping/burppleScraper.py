@@ -290,7 +290,7 @@ def generate_restaurant_details(restaurant_csv, browser):
     })
     return restaurant_description_df
 
-def scraping_pipeline(DIR):
+def scraping_pipeline(restaurant_csv, restaurant_detailed_csv, review_csv):
     '''
     Runs through entire scraping pipeline and saves files according to directory input
     Parameters:
@@ -298,7 +298,7 @@ def scraping_pipeline(DIR):
     Returns: None
     '''
     print("scraping pipeline called")
-    return 
+    return None
 
 if __name__ == "__main__":
     # instantiate directories
@@ -322,9 +322,9 @@ if __name__ == "__main__":
 
         # generate restaurant details
         restaurant_description_df = generate_restaurant_details(restaurant_csv=RESTAURANT_CSV, browser=browser)
-        restaurant_df = pd.read_csv(RESTAURANT_CSV)
+        restaurant_df = pd.read_csv(RESTAURANT_CSV) # restaurant 
         restaurant_detailed_df = restaurant_df.merge(restaurant_description_df, on="restaurant_code", how="left")
-        restaurant_detailed_df.to_csv(RESTAURANT_DETAILED_CSV, index=False)
+        restaurant_detailed_df.to_csv(RESTAURANT_DETAILED_CSV, index=False) # restaurant_detailed
         # PROCESS CATEGORIES HERE!!!!!!!!
 
         # generate reviews
