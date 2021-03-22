@@ -2,57 +2,39 @@
 ### packages ###
 ################
 import utils
+import scraping
+import modelling
 
-################
-### scraping ###
-################
+# PATH DEFINITIONS
+RESTAURANT_CSV = "data/pipeline/restaurants.csv"
+RESTAURANT_DETAILED_CSV = "data/pipeline/restaurants_detailed.csv"
+REVIEW_CSV = "data/pipeline/reviews.csv"
+PREPROCESSED_CSV = "data/pipeline/reviews_preprocessed.csv"
+RULE_MINED_CSV = "data/pipeline/rule_mined.csv"
+POSTPROCESSED_CSV = "data/pipeline/reviews_postprocessed.csv"
+BASELINE_CSV = "data/pipeline/baseline_prediction.csv"
+ENSEMBLE_CSV = "data/pipeline/ensemble_prediction.csv"
+REVIEW_FINAL = "data/pipeline/reviews_final.csv"
+RESTAURANT_FINAL = "data/pipeline/restaurants_final.csv"
 
+if __name__ == "__main__":
+    # scrape
+    # scraping.scraping_pipeline(RESTAURANT_CSV, RESTAURANT_DETAILED_CSV, REVIEW_CSV) # SEAN 
+    
+    # preprocessing
+    utils.preprocessing_pipeline(REVIEW_CSV, PREPROCESSED_CSV)
 
-#####################
-### preprocessing ###
-#####################
-'''
-Function Name: clean_review
-Description: remove numbers, empty strings, new lines from phrases
-Input: string
-Output: string
-'''
-df['review_title'] = df['review_title'].apply(lambda x: clean_review(x))
-df['review_body'] = df['review_body'].apply(lambda x: clean_review(x))
-print("preprocessing done")
+    # rule mining
+    # utils.rule_mining_pipeline(PREPROCESSED_CSV, RULE_MINED_CSV) 
 
-###################
-### rule mining ###
-###################
-'''
-Function Name: process_reviews
-Description: generate aspects through rule mining
-Input: dataframe, string
-Output: dataframe
-'''
-df = process_reviews(df, df_path)
-print("rule mining done")
+    # postprocessing
+    utils.postprocessing_pipeline(RULE_MINED_CSV, POSTPROCESSED_CSV) 
 
-######################
-### postprocessing ###
-######################
-'''
-Function Name: 
-Description: 
-Input: 
-Output:
-'''
-print("postprocessing done")
+    # modelling
+    modelling.base_modelling_pipeline(POSTPROCESSED_CSV, BASELINE_CSV) # SEAN, YJ, XM
+    # modelling.meta_modelling_pipeline(PREDICTIONS_CSV, ENSEMBLE_CSV) # XM
 
-################
-### modeling ###
-################
-'''
-Function Name: 
-Description: 
-Input: 
-Output:
-'''
+    # scoring
+    utils.scoring_pipeline(ENSEMBLE_CSV, RESTAURANT_DETAILED_CSV, REVIEW_FINAL, RESTAURANT_FINAL)
 
-
-print("postprocessing done")
+    # ##### dashboard to read data from REVIEW_FINAL, RESTAURANT_FINAL
