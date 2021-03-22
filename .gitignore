@@ -20,3 +20,6 @@ modelling/model_results/fasttext
 modelling/new_labels
 modelling/old_labels
 modelling/fold_labels
+modelling/stacking_folds
+
+data/pipline
