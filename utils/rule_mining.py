@@ -15,6 +15,14 @@ from string import digits
 nlp = en_core_web_sm.load()
 nltk.download('punkt')
 
+FOOD_LIST = list(pd.read_csv("utils/aspects/food.csv")['food'].astype(str))
+TIME_LIST = list(pd.read_csv("utils/aspects/time.csv")['time'].astype(str))
+PRICE_LIST = list(pd.read_csv("utils/aspects/price.csv")['price'].astype(str))
+PORTION_LIST = list(pd.read_csv("utils/aspects/portion.csv")['portion'].astype(str))
+SERVICE_LIST = list(pd.read_csv("utils/aspects/service.csv")['service'].astype(str))
+AMBIENCE_LIST = list(pd.read_csv("utils/aspects/ambience.csv")['ambience'].astype(str))
+
+
 def get_all_aspects(df):
     '''
     description: get the unique synonyms for each aspect 
@@ -221,7 +229,7 @@ def get_sentences(pos_df, pos_df_original) :
             pos_df_phrases.append(pos_df_original['text'][start:end].apply(lambda x:x + ' ').sum())
     return pos_df_phrases
 
-def process_review_aspect(review, pos_df, aspect_list, to_remove) :
+def process_review_aspect(review, pos_df, aspect_list) :
     '''
     description: apply functions to aspect
     input: str, dataframe, list
@@ -232,8 +240,7 @@ def process_review_aspect(review, pos_df, aspect_list, to_remove) :
     aspect_pos = get_sentences_indexes(sentence_new, pos_df)
     aspect_pos = aspect_pos.sort_index().drop_duplicates()
     phrase_list = get_sentences(aspect_pos, pos_df)
-    phrase_list_cleaned = post_processing(phrase_list, to_remove)
-    return phrase_list_cleaned
+    return phrase_list
 
 def add_phrases(df, all_aspects) :
     '''
@@ -258,120 +265,73 @@ def add_phrases(df, all_aspects) :
     df['phrase_no_noun'] = new_phrase_no_noun
     return df
 
+
+def generate_phrase_list(row, phrase, aspect):
+    return {
+        "restaurant_code": row["restaurant_code"],
+        "review_title": row["review_title"],
+        "review_body": row["review_body"],
+        "review_date": row["review_date"],
+        "account_name": row["account_name"],
+        "account_id": row["account_id"],
+        "account_level": row["account_level"],
+        "account_photo": row["account_photo"],
+        "review_photo": row["review_photo"],
+        "scraped_date": row["scraped_date"],
+        "aspect": aspect,
+        "phrase": phrase
+    }
+
 def rule_mining_pipeline(preprocessed_csv, rule_mined_csv) :
     '''
     Reads preprocessed csv and outputs new csv with reviews split into aspects
     '''
-    # for post-processing
-    stop_words_to_remove = set(stopwords.words('english'))
-    # negated terms to not remove
-    stop_words_dont_remove = set(['no', 'not', 'nor']) 
-    # stop_words_dont_remove = set(['no', 'not', 'nor', 'don', "don't", 'should', "should've", 'ain', 'aren', "aren't", 'couldn', "couldn't", 'didn', "didn't", 'doesn', "doesn't", 'hadn', "hadn't", 'hasn', "hasn't", 'haven', "haven't", 'isn', "isn't", 'ma', 'mightn', "mightn't", 'mustn', "mustn't", 'needn', "needn't", 'shan', "shan't", 'shouldn', "shouldn't", 'wasn', "wasn't", 'weren', "weren't", 'won', "won't", 'wouldn', "wouldn't"]) 
-    stop_words = list(stop_words_to_remove-stop_words_dont_remove)
-    punctuations = list(string.punctuation)
-    to_remove = stop_words + punctuations + ["'s"]
-    
     df = pd.read_csv(preprocessed_csv)
+    df = df.fillna("")
     
-    food_phrases = []
-    time_phrases = []
-    price_phrases = []
-    portion_phrases = []
-    service_phrases = []
-    ambience_phrases = []
+    food_phrases, time_phrases, price_phrases, portion_phrases, service_phrases, ambience_phrases = [], [], [], [], [], []
+    aspect_list, phrase_list, restaurant_code, review_title, review_body, account_name, account_id = [], [], [], [], [], [], []
     
-    aspect_list = []
-    phrase_list = []
-    restaurant_code = []
-    review_title = []
-    review_body = []
-    account_name = []
-    account_id = []
-    
-    for i in range(0, len(df)) :
+    phrases_data_list = []
+    for i, row in df.iterrows():
+        review = (row["review_title"] + " " + row["review_body"]).lower()
         
-        review = (str(df['review_title'][i])+str(df['review_body'][i])).lower()
         # for pre-processing
-        review = pre_processing(review)
         pos_df = get_pos(review)
         
         # get phrases for each aspect
-        food_phrases = process_review_aspect(review, pos_df, food_list, to_remove)
-        time_phrases = process_review_aspect(review, pos_df, time_list, to_remove)
-        price_phrases = process_review_aspect(review, pos_df, price_list, to_remove)
-        portion_phrases = process_review_aspect(review, pos_df, portion_list, to_remove)
-        service_phrases = process_review_aspect(review, pos_df, service_list, to_remove)
-        ambience_phrases = process_review_aspect(review, pos_df, ambience_list, to_remove)
+        food_phrases = process_review_aspect(review, pos_df, FOOD_LIST) 
+        time_phrases = process_review_aspect(review, pos_df, TIME_LIST)
+        price_phrases = process_review_aspect(review, pos_df, PRICE_LIST)
+        portion_phrases = process_review_aspect(review, pos_df, PORTION_LIST)
+        service_phrases = process_review_aspect(review, pos_df, SERVICE_LIST)
+        ambience_phrases = process_review_aspect(review, pos_df, AMBIENCE_LIST)
 
-        # add aspects together
-        if len(food_phrases) > 0 :
-            for j in range(0, len(food_phrases)) :
-                aspect_list.append('food')
-                phrase_list.append(food_phrases[j])
-                restaurant_code.append(df['restaurant_code'][i])
-                review_title.append(df['review_title'][i])
-                review_body.append(df['review_body'][i])
-                account_name.append(df['account_name'][i])
-                account_id.append(df['account_id'][i])
-        if len(time_phrases) > 0 :
-            for j in range(0, len(time_phrases)) :
-                aspect_list.append('time')
-                phrase_list.append(time_phrases[j])
-                restaurant_code.append(df['restaurant_code'][i])
-                review_title.append(df['review_title'][i])
-                review_body.append(df['review_body'][i])
-                account_name.append(df['account_name'][i])
-                account_id.append(df['account_id'][i])
-        if len(price_phrases) > 0 :
-            for j in range(0, len(price_phrases)) :
-                aspect_list.append('price')
-                phrase_list.append(price_phrases[j])
-                restaurant_code.append(df['restaurant_code'][i])
-                review_title.append(df['review_title'][i])
-                review_body.append(df['review_body'][i])
-                account_name.append(df['account_name'][i])
-                account_id.append(df['account_id'][i])
-        if len(portion_phrases) > 0 :
-            for j in range(0, len(portion_phrases)) :
-                aspect_list.append('portion')
-                phrase_list.append(portion_phrases[j])
-                restaurant_code.append(df['restaurant_code'][i])
-                review_title.append(df['review_title'][i])
-                review_body.append(df['review_body'][i])
-                account_name.append(df['account_name'][i])
-                account_id.append(df['account_id'][i])
-        if len(service_phrases) > 0 :
-            for j in range(0, len(service_phrases)) :
-                aspect_list.append('service')
-                phrase_list.append(service_phrases[j])
-                restaurant_code.append(df['restaurant_code'][i])
-                review_title.append(df['review_title'][i])
-                review_body.append(df['review_body'][i])
-                account_name.append(df['account_name'][i])
-                account_id.append(df['account_id'][i])
-        if len(ambience_phrases) > 0 :
-            for j in range(0, len(ambience_phrases)) :
-                aspect_list.append('ambience')
-                phrase_list.append(ambience_phrases[j])
-                restaurant_code.append(df['restaurant_code'][i])
-                review_title.append(df['review_title'][i])
-                review_body.append(df['review_body'][i])
-                account_name.append(df['account_name'][i])
-                account_id.append(df['account_id'][i])
-
-        #print(i, "out of", len(df), "done")
+        for phrase in food_phrases:
+            phrases_data_list.append(generate_phrase_list(row, phrase, "food"))
+        for phrase in time_phrases:
+            phrases_data_list.append(generate_phrase_list(row, phrase, "time"))
+        for phrase in price_phrases:
+            phrases_data_list.append(generate_phrase_list(row, phrase, "price"))
+        for phrase in portion_phrases:
+            phrases_data_list.append(generate_phrase_list(row, phrase, "portion"))
+        for phrase in service_phrases:
+            phrases_data_list.append(generate_phrase_list(row, phrase, "service"))
+        for phrase in ambience_phrases:
+            phrases_data_list.append(generate_phrase_list(row, phrase, "ambience"))
     
     # create df
-    output = pd.DataFrame({'restaurant_code': restaurant_code, 'review_title': review_title, 'review_body': review_body, 'account_name': account_name, 'account_id': account_id, 'aspect': aspect_list, 'phrase': phrase_list})
+    output = pd.DataFrame(phrases_data_list)
+
     # remove empty phrases
     output = output.loc[output['phrase'].apply(lambda x: len(x)>0)]
+
     # set phrases to str
-    output['phrase'] = output['phrase'].apply(lambda x: ", ".join(x))
+    output['phrase'] = output['phrase'].apply(lambda x: "".join(x))
+
     # remove duplicated rows
     output = output.drop_duplicates().reset_index(drop=True)
-
-    # add phrase_no_noun and phrase_no_aspect
-    # output = add_phrases(output, all_aspects)
     
     # save as csv
     output.to_csv(rule_mined_csv, index=False)
+    print("RULE MINING COMPLETE")

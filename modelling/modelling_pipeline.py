@@ -2,12 +2,13 @@ import pickle
 import pandas as pd
 
 # instantiate models
-LOGREG_VECT = "modelling/saved_models/model_logreg.pkl"
+LOGREG_VECT = "modelling/saved_models/model_logreg_vectorizer.pkl"
 LOGREG_MODEL = "modelling/saved_models/model_logreg.pkl"
 META_MODEL = "modelling/saved_models/model_meta.pkl"
 
 def base_modelling_pipeline(processed_csv, prediction_csv):
     '''
+    Reads processed data and outputs csv of predictions for each model
     '''
     # READ PROCESSED DATA
     processed_df = pd.read_csv(processed_csv)
@@ -19,7 +20,6 @@ def base_modelling_pipeline(processed_csv, prediction_csv):
     lr_predictions = lr_model.predict_proba(lr_transformed_text)
     processed_df["logreg_prob_pos"] = lr_predictions[:, 2]
     processed_df["logreg_prob_neg"] = lr_predictions[:, 0]
-
     # SUPPORT VECTOR MACHINE PREDICTION
 
 
@@ -34,7 +34,8 @@ def base_modelling_pipeline(processed_csv, prediction_csv):
 
     # BERT PREDICTION
     
-    processed_df.to_csv(prediction_csv)
+    processed_df.to_csv(prediction_csv, index=False)
+    print("BASELINE PREDICTIONS COMPLETE")
 
 def ensemble_modelling_pipeline(prediction_csv, ensemble_file):
     '''
@@ -57,3 +58,4 @@ def ensemble_modelling_pipeline(prediction_csv, ensemble_file):
 
     # save ensemble predictions
     ensemble_predictions.to_csv(ensemble_file, index=False)
+    print("ENSEMBLE PREDICTIONS COMPLETE")
