@@ -22,4 +22,4 @@ modelling/old_labels
 modelling/fold_labels
 modelling/stacking_folds
 
-data/pipline
+data/pipeline
