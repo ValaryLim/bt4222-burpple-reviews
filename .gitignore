@@ -11,15 +11,16 @@ scraper3
 scraper4
 
 dashboard/data
+
+# fasttext utils: pretrained yelp_review_polarity.bin
 modelling/utils/fasttext
 modelling/dummy_data.py
+# data folder
 modelling/data
+# cache and runs for BERT model
 modelling/cache_dir
-modelling/model_results/bert
-modelling/model_results/fasttext
-modelling/new_labels
-modelling/old_labels
-modelling/fold_labels
-modelling/stacking_folds
+modelling/runs
+modelling/saved_models/bert
+
 
 data/pipeline
