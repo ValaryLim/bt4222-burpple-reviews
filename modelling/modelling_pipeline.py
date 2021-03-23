@@ -58,20 +58,20 @@ def ensemble_modelling_pipeline(prediction_csv, ensemble_file):
     
     # generate ensemble predictions
     meta_model = pickle.load(open(META_MODEL, "rb"))
+
+    #fit model
+    predictions_df[["prob_neg","prob_neu","prob_pos"]] = meta_model.predict_proba(predictions_df[['bert_prob_pos', 'bert_prob_neg', 'fasttext_prob_pos',
+       'fasttext_prob_neg', 'logreg_prob_pos', 'logreg_prob_neg',
+       'NB_prob_pos', 'NB_prob_neg', 'RF_prob_pos', 'RF_prob_neg',
+       'SVM_prob_pos', 'SVM_prob_neg', 'VADER_prob_pos', 'VADER_prob_neg',
+       'label']])[:, 0:2]
+    
+
+
     # i want the predictions in this format!
-    ensemble_predictions = pd.DataFrame(columns=["restaurant-code", "review_title", "review_body", "account_name", 
+    ensemble_predictions = pd.DataFrame(data=predictions_df,columns=["restaurant-code", "review_title", "review_body", "account_name", 
         "account_id",  "account_level", "account_photo", "review_photo", "location", "aspect", 
         "prob_pos", "prob_neu", "prob_neg"]) 
-    
-    # load model
-    meta_model = pickle.load(open(META_MODEL, "rb"))
-    
-    
-    
-    # predict --> predict on which columns , save which columns! COME BACK
-    
-    predictions = meta_model.predict_proba(predictions_df)
-    
     
     
     # save ensemble predictions
