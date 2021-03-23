@@ -24,5 +24,6 @@ modelling/data
 modelling/cache_dir
 modelling/runs
 modelling/saved_models
+modelling/stacking_preds
 
 .ipynb_checkpoints
