@@ -1,29 +1,26 @@
 data
+__pycache__
 .DS_Store
-scraping/utils/chromedriver
-scraping/utils/chromedriver.exe
-scraping/utils/__pycache__
-scraping/.DS_Store
-scraping/utils/.DS_Store
+.ipynb_checkpoints
+
+scraping/chromedriver
+scraping/chromedriver.exe
 scraper1
 scraper2
 scraper3
 scraper4
 
 dashboard/data
-dashboard/utils/__pycache__
-dashboard/__pycache__
-dashboard/apps/__pycache__
-dashboard/utils/__pycache__
 
-modelling/.ipynb_checkpoints
-modelling/utils/__pycache__
+# fasttext utils: pretrained yelp_review_polarity.bin
 modelling/utils/fasttext
 modelling/dummy_data.py
+# data folder
 modelling/data
+# cache and runs for BERT model
 modelling/cache_dir
 modelling/runs
-modelling/saved_models
-modelling/stacking_preds
+modelling/saved_models/bert
 
-.ipynb_checkpoints
+
+data/pipeline
