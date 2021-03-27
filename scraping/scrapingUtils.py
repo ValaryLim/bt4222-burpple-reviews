@@ -87,6 +87,19 @@ def process_categories(df, category_column="categories"):
             df[actual_category] = updated_row
     return df
 
+def process_restaurant_details(df, columns_to_process, final_path):
+    df = process_csv_lists(df, columns_to_process)
+    df = process_categories(df, category_column='categories')
+    df.to_csv(final_path, index=False)
+
+def get_all_reviews(current_reviews_path, new_reviews_path):
+    current_reviews=pd.read_csv(current_reviews_path)
+    new_reviews=pd.read_csv(new_reviews_path)
+    all_reviews=pd.concat([current_reviews, new_reviews])
+
+    # Refresh existing csv 
+    all_reviews.to_csv(current_reviews_path, index=False)
+
 def load_url(url, browser):
     ''' 
     Loads html of any url in burpple and returns BeautifulSoup object

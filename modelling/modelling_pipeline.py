@@ -5,9 +5,15 @@ nltk.download('vader_lexicon')
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 # instantiate models
-LOGREG_VECT = "modelling/saved_models/model_logreg_vectorizer.pkl"
-LOGREG_MODEL = "modelling/saved_models/model_logreg.pkl"
-META_MODEL = "modelling/saved_models/model_meta.pkl"
+LOGREG_VECT = "saved_models/model_logreg_vectorizer.pkl"
+LOGREG_MODEL = "saved_models/model_logreg.pkl"
+SVM_VECT = "saved_models/model_SVM_vectorizer.pkl"
+SVM_MODEL = "saved_models/model_SVM.pkl"
+NB_VECT = "saved_models/model_NB_vectorizer.pkl"
+NB_MODEL = "saved_models/model_NB.pkl"
+RF_VECT = "saved_models/model_RF_vectorizer.pkl"
+RF_MODEL = "saved_models/model_RF.pkl"
+META_MODEL = "saved_models/model_meta.pkl"
 
 def base_modelling_pipeline(processed_csv, prediction_csv):
     '''
@@ -23,14 +29,30 @@ def base_modelling_pipeline(processed_csv, prediction_csv):
     lr_predictions = lr_model.predict_proba(lr_transformed_text)
     processed_df["logreg_prob_pos"] = lr_predictions[:, 2]
     processed_df["logreg_prob_neg"] = lr_predictions[:, 0]
-    # SUPPORT VECTOR MACHINE PREDICTION
 
+    # SUPPORT VECTOR MACHINE PREDICTION
+    svm_vectorizer = pickle.load(open(SVM_VECT, "rb"))
+    svm_model = pickle.load(open(SVM_MODEL, "rb"))
+    svm_transformed_text = svm_vectorizer.transform(processed_df.phrase_emoticon_generic)
+    svm_predictions = svm_model.predict_proba(svm_transformed_text)
+    processed_df["SVM_prob_pos"] = svm_predictions[:, 2]
+    processed_df["SVM_prob_neg"] = svm_predictions[:, 0]
 
     # NAIVE BAYES PREDICTION
-
+    nb_vectorizer = pickle.load(open(NB_VECT, "rb"))
+    nb_model = pickle.load(open(NB_MODEL, "rb"))
+    nb_transformed_text = nb_vectorizer.transform(processed_df.phrase_stem_emoticon_generic)
+    nb_predictions = nb_model.predict_proba(nb_transformed_text)
+    processed_df["NB_prob_pos"] = nb_predictions[:, 2]
+    processed_df["NB_prob_neg"] = nb_predictions[:, 0]
 
     # RANDOM FOREST PREDICTION
-
+    rf_vectorizer = pickle.load(open(RF_VECT, "rb"))
+    rf_model = pickle.load(open(RF_MODEL, "rb"))
+    rf_transformed_text = rf_vectorizer.transform(processed_df.phrase_stem_emoticon_generic)
+    rf_predictions = rf_model.predict_proba(rf_transformed_text)
+    processed_df["RF_prob_pos"] = rf_predictions[:, 2]
+    processed_df["RF_prob_neg"] = rf_predictions[:, 0]
 
     # FASTTEXT PREDICTION
 
