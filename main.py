@@ -19,7 +19,7 @@ RESTAURANT_FINAL = "data/pipeline/restaurants_final.csv"
 
 if __name__ == "__main__":
     # scrape
-    # scraping.scraping_pipeline(RESTAURANT_CSV, RESTAURANT_DETAILED_CSV, REVIEW_CSV) # SEAN 
+    scraping.scraping_pipeline(RESTAURANT_CSV, RESTAURANT_DETAILED_CSV, REVIEW_CSV)
     
     # preprocessing
     utils.preprocessing_pipeline(REVIEW_CSV, PREPROCESSED_CSV)
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     utils.postprocessing_pipeline(RULE_MINED_CSV, POSTPROCESSED_CSV) 
 
     # modelling
-    modelling.base_modelling_pipeline(POSTPROCESSED_CSV, BASELINE_CSV) # SEAN, YJ, XM
+    modelling.base_modelling_pipeline(POSTPROCESSED_CSV, BASELINE_CSV) # YJ, XM
     # modelling.meta_modelling_pipeline(PREDICTIONS_CSV, ENSEMBLE_CSV) # XM
 
     # scoring
