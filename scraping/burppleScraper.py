@@ -189,7 +189,7 @@ def scrape_reviews_by_restaurant(restaurant_code, browser):
     review_df["scraped_date"] = datetime.date.today()
     return review_df
 
-def generate_restaurants(restaurant_list_dir, browser):
+def generate_restaurants(restaurant_list_dir, restaurant_csv, browser):
     # retrieve neighbourhoods
     neighbourhoods = scrape_neighbourhoods(browser)
 
@@ -205,9 +205,12 @@ def generate_restaurants(restaurant_list_dir, browser):
         n_path = restaurant_list_dir + n + ".csv"
         restaurants_df.to_csv(n_path, index=False)
 
+    # compile restaurants 
+    compile(raw_dir=restaurant_list_dir, compiled_dir=restaurant_csv)
+
 def generate_reviews(restaurant_csv, restaurant_reviews_dir, browser):
     # retrieve restaurants
-    combined_restaurant_df = pd.read_csv(restaurant_csv) #[7501:11250]
+    combined_restaurant_df = pd.read_csv(restaurant_csv)
 
     # retrieve reviews per restaurant
     for r_term in combined_restaurant_df["restaurant_code"].values:
@@ -219,7 +222,6 @@ def generate_reviews(restaurant_csv, restaurant_reviews_dir, browser):
         time.sleep(np.random.uniform(3,5)) 
 
 def scrape_details_by_restaurant(restaurant_code, browser):
-    # from selenium.webdriver.common.by import By
     restaurant_url = "https://www.burpple.com/" + restaurant_code
     browser.get(restaurant_url)
 
@@ -288,22 +290,54 @@ def generate_restaurant_details(restaurant_csv, browser):
         "restaurant_website": websites,
         "restaurant_photo": photos
     })
-    return restaurant_description_df
+
+    restaurant_detailed_df = restaurant_df.merge(restaurant_description_df, on="restaurant_code", how="left")
+    return restaurant_detailed_df 
 
 def scraping_pipeline(restaurant_csv, restaurant_detailed_csv, review_csv):
     '''
     Runs through entire scraping pipeline and saves files according to directory input
     Parameters:
-
     Returns: None
     '''
     print("scraping pipeline called")
+
+    # Set required intermediate variables 
+    RESTAURANT_LIST_DIR = "../data/raw/restaurant_lists/"
+    RESTAURANT_REVIEWS_DIR = "./data/raw/restaurant_reviews/"
+    RESTAURANT_REVIEWS_NEW = "./data/processed/new_reviews.csv"
+    TO_PROCESS = ['categories'] 
+
+    # Configure chrome options 
+    chrome_options = Options()  
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--no-sandbox")
+
+    with Chrome("./scraping/utils/chromedriver", options=chrome_options) as browser:
+        print("scraping restaurants")
+        generate_restaurants(restaurant_list_dir=RESTAURANT_LIST_DIR, restaurant_csv=restaurant_csv, browser=browser)
+
+        print("scraping additional restaurant details")
+        restaurant_detailed_df = generate_restaurant_details(restaurant_csv=restaurant_csv, browser=browser)
+
+        print("processing additional restaurant details")
+        process_restaurant_details(restaurant_detailed_df, TO_PROCESS, restaurant_detailed_csv)
+
+        print("scraping new reviews")
+        generate_reviews(restaurant_csv=restaurant_csv, restaurant_reviews_dir=RESTAURANT_REVIEWS_DIR, browser=browser)
+        compile(raw_dir=RESTAURANT_REVIEWS_DIR, compiled_dir=RESTAURANT_REVIEWS_NEW)
+
+        print("appending new reviews to current reviews")
+        get_all_reviews(review_csv, RESTAURANT_REVIEWS_NEW)
+
+        print("scraping done")
     return None
 
 if __name__ == "__main__":
     # instantiate directories
     RESTAURANT_LIST_DIR = "../data/raw/restaurant_lists_mar/"
     RESTAURANT_CSV = "../data/processed/restaurant_all_mar.csv"
+
     RESTAURANT_DETAILED_CSV = "../data/processed/restaurant_all_detailed_mar.csv"
     RESTAURANT_REVIEWS_DIR = "../data/raw/restaurant_reviews_mar/"
     REVIEWS_CSV = "../data/processed/reviews_all_mar.csv" 
@@ -316,19 +350,14 @@ if __name__ == "__main__":
 
     with Chrome("./utils/chromedriver", options=chrome_options) as browser:
         # generate restaurants
-        generate_restaurants(restaurant_list_dir=RESTAURANT_LIST_DIR, browser=browser)
-        # compile restaurants 
-        compile(raw_dir=RESTAURANT_LIST_DIR, compiled_dir=RESTAURANT_CSV)
+        generate_restaurants(restaurant_list_dir=RESTAURANT_LIST_DIR, restaurant_csv=RESTAURANT_CSV, browser=browser)
 
         # generate restaurant details
-        restaurant_description_df = generate_restaurant_details(restaurant_csv=RESTAURANT_CSV, browser=browser)
-        restaurant_df = pd.read_csv(RESTAURANT_CSV) # restaurant 
-        restaurant_detailed_df = restaurant_df.merge(restaurant_description_df, on="restaurant_code", how="left")
-        restaurant_detailed_df.to_csv(RESTAURANT_DETAILED_CSV, index=False) # restaurant_detailed
-        # PROCESS CATEGORIES HERE!!!!!!!!
+        restaurant_detailed_df = generate_restaurant_details(restaurant_csv=RESTAURANT_CSV, browser=browser)
+        process_restaurant_details(restaurant_detailed_df, ['categories'], RESTAURANT_DETAILED_CSV)
 
         # generate reviews
-        # generate_reviews(restaurant_csv=RESTAURANT_CSV, restaurant_reviews_dir=RESTAURANT_REVIEWS_DIR, browser=browser)
+        generate_reviews(restaurant_csv=RESTAURANT_CSV, restaurant_reviews_dir=RESTAURANT_REVIEWS_DIR, browser=browser)
 
         # compile restaurants 
         compile(raw_dir=RESTAURANT_REVIEWS_DIR, compiled_dir=REVIEWS_CSV)
