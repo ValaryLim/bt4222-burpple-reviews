@@ -31,7 +31,7 @@ if __name__ == "__main__":
     utils.postprocessing_pipeline(RULE_MINED_CSV, POSTPROCESSED_CSV) 
 
     # modelling
-    modelling.base_modelling_pipeline(POSTPROCESSED_CSV, BASELINE_CSV) # YJ, XM
+    modelling.base_modelling_pipeline(POSTPROCESSED_CSV, BASELINE_CSV) # XM
     # modelling.meta_modelling_pipeline(PREDICTIONS_CSV, ENSEMBLE_CSV) # XM
 
     # scoring
