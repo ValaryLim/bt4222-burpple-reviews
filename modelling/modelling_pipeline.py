@@ -3,6 +3,9 @@ import pandas as pd
 import nltk
 nltk.download('vader_lexicon')
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
+import fasttext
+from scipy.special import softmax
+from simpletransformers.classification import ClassificationModel, ClassificationArgs
 
 # instantiate models
 LOGREG_VECT = "saved_models/model_logreg_vectorizer.pkl"
@@ -13,7 +16,17 @@ NB_VECT = "saved_models/model_NB_vectorizer.pkl"
 NB_MODEL = "saved_models/model_NB.pkl"
 RF_VECT = "saved_models/model_RF_vectorizer.pkl"
 RF_MODEL = "saved_models/model_RF.pkl"
+FASTTEXT_MODEL = "saved_models/model_fasttext.bin"
+BERT_MODEL = "saved_models/model_bert"
 META_MODEL = "saved_models/model_meta.pkl"
+
+def fasttext_get_index(lst, tag):
+    '''
+    Helper function to make fasttext predictions
+    '''
+    for i in range(len(lst)):
+        if lst[i][-3:] == tag:
+            return i
 
 def base_modelling_pipeline(processed_csv, prediction_csv):
     '''
@@ -55,9 +68,32 @@ def base_modelling_pipeline(processed_csv, prediction_csv):
     processed_df["RF_prob_neg"] = rf_predictions[:, 0]
 
     # FASTTEXT PREDICTION
-
+    fasttext_model = fasttext.load_model(FASTTEXT_MODEL)
+    fasttext_df = processed_df.copy()
+    # get raw output (('__label__pos', '__label__zer', '__label__neg'), array([0.74627936, 0.19218659, 0.06156404]))
+    fasttext_df['raw_output'] = fasttext_df.apply(lambda x: fasttext_model.predict(x['phrase_stem'].replace("\n", ""), k=-1), axis=1)
+    # get raw prob [0.74627936, 0.19218659, 0.06156404]
+    fasttext_df['raw_prob'] = fasttext_df.apply(lambda x: list(x.raw_output[1]), axis=1)
+    # get pos and neg index
+    fasttext_df['pos_index'] = fasttext_df.apply(lambda x: fasttext_get_index(list(x.raw_output[0]), 'pos'), axis=1)
+    fasttext_df['neg_index'] = fasttext_df.apply(lambda x: fasttext_get_index(list(x.raw_output[0]), 'neg'), axis=1)
+    # get prob_pos and prob_neg
+    fasttext_df['fasttext_prob_pos'] = fasttext_df.apply(lambda x: x.raw_prob[x.pos_index], axis=1)
+    fasttext_df['fasttext_prob_neg'] = fasttext_df.apply(lambda x: x.raw_prob[x.neg_index], axis=1)
+    # add to processed_df
+    processed_df["fasttext_prob_pos"] = fasttext_df['fasttext_prob_pos']
+    processed_df["fasttext_prob_neg"] = fasttext_df['fasttext_prob_neg']
 
     # BERT PREDICTION
+    bert_model_args = ClassificationArgs(num_train_epochs=2, learning_rate=5e-5)
+    bert_model = ClassificationModel(model_type = 'bert', \
+                                     model_name = BERT_MODEL, \
+                                     args = bert_model_args, use_cuda = False)
+    bert_pred, bert_raw_outputs = bert_model.predict(processed_df.phrase)
+    # convert raw output to probabilities
+    bert_probabilities = softmax(bert_raw_outputs, axis=1)
+    processed_df['bert_prob_pos'] = bert_probabilities[:, 1]
+    processed_df['bert_prob_neg'] = bert_probabilities[:, 2]
     
     # VADER PREDICTION
     processed_df[["VADER_prob_pos","VADER_prob_neg"]] = load_VADER_model(processed_df)
@@ -81,7 +117,7 @@ def ensemble_modelling_pipeline(prediction_csv, ensemble_file):
     # generate ensemble predictions
     meta_model = pickle.load(open(META_MODEL, "rb"))
 
-    #fit model
+    # fit model
     predictions_df[["prob_neg","prob_neu","prob_pos"]] = meta_model.predict_proba(predictions_df[['bert_prob_pos', 'bert_prob_neg', 'fasttext_prob_pos',
        'fasttext_prob_neg', 'logreg_prob_pos', 'logreg_prob_neg',
        'NB_prob_pos', 'NB_prob_neg', 'RF_prob_pos', 'RF_prob_neg',

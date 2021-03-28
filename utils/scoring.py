@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from datetime import datetime
 
 def compute_score(prob_pos, prob_neu, prob_neg):
     '''
@@ -54,6 +55,30 @@ def aggregate_reviews(df):
 
     return aggregated_df
 
+def aggregate_restaurants(reviews_df):
+    df = reviews_df.copy()
+    # weight reviews by date of review
+    df['date'] = df.apply(lambda x: datetime.strptime(str(x.review_date), '%d/%m/%y'), axis=1)
+    df['half_years'] = df.apply(lambda x: round((datetime.today() - x.date).days/182, 1), axis=1)
+    # define aspects
+    aspects_list = ['overall', 'food', 'service', 'price', 'ambience', 'portion', 'time']
+    # group by restaurant
+    restaurant_groups = df.groupby(by=['restaurant_code'])
+    aggregated_df = pd.DataFrame()
+    for restaurant, restaurant_df in restaurant_groups:
+        # store restaurant scores in a dictionary
+        restaurant_scores = dict()
+        restaurant_scores['restaurant_code'] = restaurant
+        # replace nan with zeros
+        restaurant_df = restaurant_df.replace(np.nan, 0)
+        # calculate average scores weighted by review date
+        for aspect in aspects_list:
+            restaurant_scores[f'restaurant_rating_{aspect}'] = np.average(restaurant_df[f'review_rating_{aspect}'], weights=1/restaurant_df['half_years'])
+        aggregated_df = aggregated_df.append(restaurant_scores, ignore_index=True)
+    # replace 0 with np.nan
+    aggregated_df = aggregated_df.replace(0, np.nan)
+    return aggregated_df
+
 def scoring_pipeline(ensemble_csv, restaurant_csv, review_final_csv, restaurant_final_csv):
     ensemble_df = pd.read_csv(ensemble_csv)
 
@@ -66,14 +91,15 @@ def scoring_pipeline(ensemble_csv, restaurant_csv, review_final_csv, restaurant_
 
     # aggregate scoring for restaurants
     restaurant_orig_df = pd.read_csv(restaurant_csv)
-    # #### insert code here to aggregate review_aggregated into restaurants
-    aggregated_restaurants_df = pd.DataFrame(columns=["restaurant_code", "restaurant_id", "restaurant_name", "location", 
-        "lat",  "long", "price_per_pax", "categories", "restaurant_description", "restaurant_operating_hours", 
-        "restaurant_address", "restaurant_number", "restaurant_website", "restaurant_photo", 
-        "review_rating_food", "review_rating_service", "review_rating_price", "review_rating_portion", 
-        "review_rating_ambience", "review_rating_time", "review_rating_overall", "Italian", "Malay", "Japanese", 
-        "Chinese", "Western", "Korean", "Thai", "Vietnamese", "Mexican", "Indian", "Local Delights", "Desserts",
-        "Healthy", "Cafes & Coffee", "Halal", "Beverages", "Others"])
+    aggregated_restaurants_df = aggregate_restaurants(aggregated_reviews_df)
+    aggregated_restaurants_df = aggregated_restaurants_df.merge(restaurant_orig_df, on=['restaurant_code'])
+    # aggregated_restaurants_df = pd.DataFrame(columns=["restaurant_code", "restaurant_id", "restaurant_name", "location", 
+    #     "lat",  "long", "price_per_pax", "categories", "restaurant_description", "restaurant_operating_hours", 
+    #     "restaurant_address", "restaurant_number", "restaurant_website", "restaurant_photo", 
+    #     "review_rating_food", "review_rating_service", "review_rating_price", "review_rating_portion", 
+    #     "review_rating_ambience", "review_rating_time", "review_rating_overall", "Italian", "Malay", "Japanese", 
+    #     "Chinese", "Western", "Korean", "Thai", "Vietnamese", "Mexican", "Indian", "Local Delights", "Desserts",
+    #     "Healthy", "Cafes & Coffee", "Halal", "Beverages", "Others"])
     aggregated_restaurants_df.to_csv(restaurant_final_csv, index=False)
 
     print("SCORING COMPLETE")
