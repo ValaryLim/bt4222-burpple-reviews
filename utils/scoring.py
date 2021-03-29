@@ -69,14 +69,17 @@ def aggregate_restaurants(reviews_df):
         # store restaurant scores in a dictionary
         restaurant_scores = dict()
         restaurant_scores['restaurant_code'] = restaurant
-        # replace nan with zeros
-        restaurant_df = restaurant_df.replace(np.nan, 0)
+
         # calculate average scores weighted by review date
         for aspect in aspects_list:
-            restaurant_scores[f'restaurant_rating_{aspect}'] = np.average(restaurant_df[f'review_rating_{aspect}'], weights=1/restaurant_df['half_years'])
+            aspect_df = pd.DataFrame(restaurant_df[[f'review_rating_{aspect}', 'half_years']])
+            # drop na
+            aspect_df = aspect_df.dropna()
+            if len(aspect_df) > 0:
+                restaurant_scores[f'restaurant_rating_{aspect}'] = np.average(aspect_df[f'review_rating_{aspect}'], weights=1/aspect_df['half_years'])
+            else:
+                restaurant_scores[f'restaurant_rating_{aspect}'] = np.nan
         aggregated_df = aggregated_df.append(restaurant_scores, ignore_index=True)
-    # replace 0 with np.nan
-    aggregated_df = aggregated_df.replace(0, np.nan)
     return aggregated_df
 
 def scoring_pipeline(ensemble_csv, restaurant_csv, review_final_csv, restaurant_final_csv):
