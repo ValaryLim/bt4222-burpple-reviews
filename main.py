@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     # modelling
     modelling.base_modelling_pipeline(POSTPROCESSED_CSV, BASELINE_CSV)
-    modelling.meta_modelling_pipeline(PREDICTIONS_CSV, ENSEMBLE_CSV)
+    # modelling.meta_modelling_pipeline(PREDICTIONS_CSV, ENSEMBLE_CSV)
 
     # scoring
     utils.scoring_pipeline(ENSEMBLE_CSV, RESTAURANT_DETAILED_CSV, REVIEW_FINAL, RESTAURANT_FINAL)
