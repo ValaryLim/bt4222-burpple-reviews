@@ -26,3 +26,5 @@ modelling/new_labels
 data/pipeline
 modelling/stacking_folds
 modelling/fold_predictions
+# bert model is too large to push to github
+modelling/saved_models/model_bert/

@@ -337,6 +337,7 @@ if __name__ == "__main__":
     # instantiate directories
     RESTAURANT_LIST_DIR = "../data/raw/restaurant_lists_mar/"
     RESTAURANT_CSV = "../data/processed/restaurant_all_mar.csv"
+
     RESTAURANT_DETAILED_CSV = "../data/processed/restaurant_all_detailed_mar.csv"
     RESTAURANT_REVIEWS_DIR = "../data/raw/restaurant_reviews_mar/"
     REVIEWS_CSV = "../data/processed/reviews_all_mar.csv" 

@@ -25,14 +25,14 @@ if __name__ == "__main__":
     utils.preprocessing_pipeline(REVIEW_CSV, PREPROCESSED_CSV)
 
     # rule mining
-    # utils.rule_mining_pipeline(PREPROCESSED_CSV, RULE_MINED_CSV) 
+    utils.rule_mining_pipeline(PREPROCESSED_CSV, RULE_MINED_CSV) 
 
     # postprocessing
     utils.postprocessing_pipeline(RULE_MINED_CSV, POSTPROCESSED_CSV) 
 
     # modelling
-    modelling.base_modelling_pipeline(POSTPROCESSED_CSV, BASELINE_CSV) # YJ, XM
-    # modelling.meta_modelling_pipeline(PREDICTIONS_CSV, ENSEMBLE_CSV) # XM
+    modelling.base_modelling_pipeline(POSTPROCESSED_CSV, BASELINE_CSV)
+    # modelling.meta_modelling_pipeline(PREDICTIONS_CSV, ENSEMBLE_CSV)
 
     # scoring
     utils.scoring_pipeline(ENSEMBLE_CSV, RESTAURANT_DETAILED_CSV, REVIEW_FINAL, RESTAURANT_FINAL)
