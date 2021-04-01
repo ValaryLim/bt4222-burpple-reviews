@@ -265,7 +265,7 @@ def scrape_details_by_restaurant(restaurant_code, browser):
     return restaurant_description, restaurant_hours, restaurant_address, restaurant_number, restaurant_website, restaurant_photos
 
 def generate_restaurant_details(restaurant_csv, browser):
-    restaurant_df = pd.read_csv(restaurant_csv)
+    restaurant_df = pd.read_csv(restaurant_csv)[7001:10000]
     codes, descriptions, hours, addresses, numbers, websites, photos = [], [], [], [], [], [], []
     count = 0
     for code in restaurant_df.restaurant_code:
@@ -337,7 +337,6 @@ if __name__ == "__main__":
     # instantiate directories
     RESTAURANT_LIST_DIR = "../data/raw/restaurant_lists_mar/"
     RESTAURANT_CSV = "../data/processed/restaurant_all_mar.csv"
-
     RESTAURANT_DETAILED_CSV = "../data/processed/restaurant_all_detailed_mar.csv"
     RESTAURANT_REVIEWS_DIR = "../data/raw/restaurant_reviews_mar/"
     REVIEWS_CSV = "../data/processed/reviews_all_mar.csv" 
@@ -347,6 +346,11 @@ if __name__ == "__main__":
     # chrome_options.add_argument("--headless") # Opens the browser up in background
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--start-maximized")
+    chrome_options.add_argument("--enable-automation")
+    chrome_options.add_argument("--disable-infobars")
+    chrome_options.add_argument("--disable-browser-side-navigation")
+    chrome_options.add_argument("--disable-gpu") 
 
     with Chrome("./utils/chromedriver", options=chrome_options) as browser:
         # generate restaurants
