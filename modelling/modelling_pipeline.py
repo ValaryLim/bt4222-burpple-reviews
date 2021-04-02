@@ -8,17 +8,18 @@ from scipy.special import softmax
 from simpletransformers.classification import ClassificationModel, ClassificationArgs
 
 # instantiate models
-LOGREG_VECT = "saved_models/model_logreg_vectorizer.pkl"
-LOGREG_MODEL = "saved_models/model_logreg.pkl"
-SVM_VECT = "saved_models/model_SVM_vectorizer.pkl"
-SVM_MODEL = "saved_models/model_SVM.pkl"
-NB_VECT = "saved_models/model_NB_vectorizer.pkl"
-NB_MODEL = "saved_models/model_NB.pkl"
-RF_VECT = "saved_models/model_RF_vectorizer.pkl"
-RF_MODEL = "saved_models/model_RF.pkl"
-FASTTEXT_MODEL = "saved_models/model_fasttext.bin"
-BERT_MODEL = "saved_models/model_bert"
-META_MODEL = "saved_models/model_meta.pkl"
+LOGREG_VECT = "modelling/saved_models/model_logreg_vectorizer.pkl"
+LOGREG_MODEL = "modelling/saved_models/model_logreg.pkl"
+SVM_VECT = "modelling/saved_models/model_SVM_vectorizer.pkl"
+SVM_MODEL = "modelling/saved_models/model_SVM.pkl"
+NB_VECT = "modelling/saved_models/model_NB_vectorizer.pkl"
+NB_MODEL = "modelling/saved_models/model_NB.pkl"
+RF_VECT = "modelling/saved_models/model_RF_vectorizer.pkl"
+RF_MODEL = "modelling/saved_models/model_RF.pkl"
+FASTTEXT_MODEL = "modelling/saved_models/model_fasttext.bin"
+# the bert model has to be downloaded from a link I've shared on GDrive
+BERT_MODEL = "modelling/saved_models/model_bert"
+META_MODEL = "modelling/saved_models/model_meta.pkl"
 
 def fasttext_get_index(lst, tag):
     '''
@@ -67,6 +68,8 @@ def base_modelling_pipeline(processed_csv, prediction_csv):
     processed_df["RF_prob_pos"] = rf_predictions[:, 2]
     processed_df["RF_prob_neg"] = rf_predictions[:, 0]
 
+    print("LR, SVM, NB, RF predictions complete")
+
     # FASTTEXT PREDICTION
     fasttext_model = fasttext.load_model(FASTTEXT_MODEL)
     fasttext_df = processed_df.copy()
@@ -84,6 +87,8 @@ def base_modelling_pipeline(processed_csv, prediction_csv):
     processed_df["fasttext_prob_pos"] = fasttext_df['fasttext_prob_pos']
     processed_df["fasttext_prob_neg"] = fasttext_df['fasttext_prob_neg']
 
+    print("Fasttext predictions complete")
+
     # BERT PREDICTION
     bert_model_args = ClassificationArgs(num_train_epochs=2, learning_rate=5e-5)
     bert_model = ClassificationModel(model_type = 'bert', \
@@ -94,10 +99,14 @@ def base_modelling_pipeline(processed_csv, prediction_csv):
     bert_probabilities = softmax(bert_raw_outputs, axis=1)
     processed_df['bert_prob_pos'] = bert_probabilities[:, 1]
     processed_df['bert_prob_neg'] = bert_probabilities[:, 2]
+
+    print("BERT predictions complete")
     
+    # @ XM comment everything above this line to run vader predictions by calling main.py 
+    # processed_df.to_csv("data/pipeline/baseline_prediction_checkpoint.csv", index=False)
+
     # VADER PREDICTION
     processed_df[["VADER_prob_pos","VADER_prob_neg"]] = load_VADER_model(processed_df)
-    
     
     processed_df.to_csv(prediction_csv, index=False)
     print("BASELINE PREDICTIONS COMPLETE")
