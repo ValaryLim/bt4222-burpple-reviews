@@ -26,7 +26,7 @@ if __name__ == "__main__":
     # utils.preprocessing_pipeline(REVIEW_CSV, PREPROCESSED_CSV)
 
     # rule mining
-    # utils.rule_mining_pipeline(PREPROCESSED_CSV, RULE_MINED_CSV) 
+    utils.rule_mining_pipeline(PREPROCESSED_CSV, RULE_MINED_CSV) 
 
     # postprocessing
     # utils.postprocessing_pipeline(RULE_MINED_CSV, POSTPROCESSED_CSV) 
