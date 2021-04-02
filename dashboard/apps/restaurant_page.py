@@ -39,12 +39,12 @@ CONTENT_STYLE = {
     "zIndex": 0
 }
 
-RESTAURANT_URL = 'data/dummy_restaurants.csv'
-REVIEW_URL = 'data/dummy_reviews.csv'
+RESTAURANT_URL = 'data/restaurants_final.csv'
+REVIEW_URL = 'data/reviews_final.csv'
 CATEGORIES = ['Italian', 'Malay', 'Japanese', 'Chinese', 'Western', 'Korean',\
     'Thai', 'Vietnamese', 'Mexican', 'Indian', 'Local Delights', 'Desserts', \
     'Healthy', 'Cafes & Coffee', 'Halal', 'Beverages', 'Others']
-ASPECTS = ['Overall', 'Taste', 'Value', 'Service', 'Ambience']
+ASPECTS = ['Overall', 'Food', 'Portion', 'Price', 'Time', 'Service', 'Ambience']
 
 # load restaurant and review data
 restaurant_df = pd.read_csv(RESTAURANT_URL)
