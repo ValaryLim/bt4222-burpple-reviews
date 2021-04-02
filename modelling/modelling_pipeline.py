@@ -5,7 +5,7 @@ nltk.download('vader_lexicon')
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import fasttext
 from scipy.special import softmax
-from simpletransformers.classification import ClassificationModel, ClassificationArgs
+#from simpletransformers.classification import ClassificationModel, ClassificationArgs
 
 # instantiate models
 LOGREG_VECT = "modelling/saved_models/model_logreg_vectorizer.pkl"
@@ -35,7 +35,7 @@ def base_modelling_pipeline(processed_csv, prediction_csv):
     '''
     # READ PROCESSED DATA
     processed_df = pd.read_csv(processed_csv)
-
+    
     # LOGISTIC REGRESSION PREDICTION
     lr_vectorizer = pickle.load(open(LOGREG_VECT, "rb"))
     lr_model = pickle.load(open(LOGREG_MODEL, "rb"))
@@ -104,14 +104,14 @@ def base_modelling_pipeline(processed_csv, prediction_csv):
     
     # @ XM comment everything above this line to run vader predictions by calling main.py 
     # processed_df.to_csv("data/pipeline/baseline_prediction_checkpoint.csv", index=False)
-
+    
     # VADER PREDICTION
     processed_df[["VADER_prob_pos","VADER_prob_neg"]] = load_VADER_model(processed_df)
     
     processed_df.to_csv(prediction_csv, index=False)
     print("BASELINE PREDICTIONS COMPLETE")
 
-def ensemble_modelling_pipeline(prediction_csv, ensemble_file):
+def meta_modelling_pipeline(prediction_csv, ensemble_file):
     '''
     Retrieves predictions for each baseline model and outputs final prediction using meta model
 
@@ -127,16 +127,16 @@ def ensemble_modelling_pipeline(prediction_csv, ensemble_file):
     meta_model = pickle.load(open(META_MODEL, "rb"))
 
     # fit model
-    predictions_df[["prob_neg","prob_neu","prob_pos"]] = meta_model.predict_proba(predictions_df[['bert_prob_pos', 'bert_prob_neg', 'fasttext_prob_pos',
+    predictions = meta_model.predict_proba(predictions_df[['bert_prob_pos', 'bert_prob_neg', 'fasttext_prob_pos',
        'fasttext_prob_neg', 'logreg_prob_pos', 'logreg_prob_neg',
        'NB_prob_pos', 'NB_prob_neg', 'RF_prob_pos', 'RF_prob_neg',
-       'SVM_prob_pos', 'SVM_prob_neg', 'VADER_prob_pos', 'VADER_prob_neg',
-       'label']])[:, 0:2]
+       'SVM_prob_pos', 'SVM_prob_neg', 'VADER_prob_pos', 'VADER_prob_neg']])[:, 0:3]
+    predictions_df[["prob_neg","prob_neu","prob_pos"]] = predictions
     
 
 
     # i want the predictions in this format!
-    ensemble_predictions = pd.DataFrame(data=predictions_df,columns=["restaurant-code", "review_title", "review_body", "account_name", 
+    ensemble_predictions = pd.DataFrame(data=predictions_df,columns=["restaurant_code", "review_title", "review_body", "account_name", 
         "account_id",  "account_level", "account_photo", "review_photo", "location", "aspect", 
         "prob_pos", "prob_neu", "prob_neg"]) 
     
@@ -218,10 +218,10 @@ def load_VADER_model(df):
     dataframe["pos"] = dataframe["polarity_scores"].map(lambda score_dict : score_dict["pos"])
     dataframe["neg"] = dataframe["polarity_scores"].map(lambda score_dict : score_dict["neg"])
 
+    model_name = "VADER"
     # Create Dataframe and output
-    df = pd.DataFrame(data=dataframe[["neg","pos","label"]].values, columns = [model_name+'_prob_neg', model_name+'_prob_pos',"label"])
-    # df.drop(columns= [model_name+'_prob_neu'])
-    ordered_cols = [model_name+'_prob_pos',model_name+'_prob_neg',"label"]
+    df = pd.DataFrame(data=dataframe[["neg","pos"]].values, columns = [model_name+'_prob_neg', model_name+'_prob_pos'])
+    ordered_cols = [model_name+'_prob_pos',model_name+'_prob_neg']
     df = df[ordered_cols]
     
     return df
