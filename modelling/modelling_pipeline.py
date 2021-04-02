@@ -46,7 +46,7 @@ def base_modelling_pipeline(processed_csv, prediction_csv):
     # SUPPORT VECTOR MACHINE PREDICTION
     svm_vectorizer = pickle.load(open(SVM_VECT, "rb"))
     svm_model = pickle.load(open(SVM_MODEL, "rb"))
-    svm_transformed_text = svm_vectorizer.transform(processed_df.phrase_emoticon_generic)
+    svm_transformed_text = svm_vectorizer.transform(processed_df.phrase)
     svm_predictions = svm_model.predict_proba(svm_transformed_text)
     processed_df["SVM_prob_pos"] = svm_predictions[:, 2]
     processed_df["SVM_prob_neg"] = svm_predictions[:, 0]
