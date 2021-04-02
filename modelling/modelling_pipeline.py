@@ -102,6 +102,7 @@ def base_modelling_pipeline(processed_csv, prediction_csv):
 
     print("BERT predictions complete")
     
+
     # VADER PREDICTION
     processed_df[["VADER_prob_pos","VADER_prob_neg"]] = load_VADER_model(processed_df)
     
