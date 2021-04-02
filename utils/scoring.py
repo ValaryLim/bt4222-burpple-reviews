@@ -76,9 +76,9 @@ def aggregate_restaurants(reviews_df):
             # drop na
             aspect_df = aspect_df.dropna()
             if len(aspect_df) > 0:
-                restaurant_scores[f'restaurant_rating_{aspect}'] = np.average(aspect_df[f'review_rating_{aspect}'], weights=1/aspect_df['half_years'])
+                restaurant_scores[f'review_rating_{aspect}'] = np.average(aspect_df[f'review_rating_{aspect}'], weights=1/aspect_df['half_years'])
             else:
-                restaurant_scores[f'restaurant_rating_{aspect}'] = np.nan
+                restaurant_scores[f'review_rating_{aspect}'] = np.nan
         aggregated_df = aggregated_df.append(restaurant_scores, ignore_index=True)
     return aggregated_df
 
