@@ -12,10 +12,7 @@ REVIEW_CSV = "data/pipeline/reviews.csv"
 PREPROCESSED_CSV = "data/pipeline/reviews_preprocessed.csv"
 RULE_MINED_CSV = "data/pipeline/rule_mined.csv"
 POSTPROCESSED_CSV = "data/pipeline/reviews_postprocessed.csv"
-# checkpoint 4 contains predictions for all models except VADER
-# POSTPROCESSED_CSV = "data/pipeline/baseline_prediction_checkpoint4.csv"
-# BASELINE_CSV = "data/pipeline/baseline_prediction.csv" # i removed this csv cause i accidentally corrupted it
-BASELINE_CSV = "data/pipeline/baseline_prediction_checkpoint.csv"
+BASELINE_CSV = "data/pipeline/baseline_prediction.csv" 
 ENSEMBLE_CSV = "data/pipeline/ensemble_prediction.csv"
 REVIEW_FINAL = "data/pipeline/reviews_final.csv"
 RESTAURANT_FINAL = "data/pipeline/restaurants_final.csv"

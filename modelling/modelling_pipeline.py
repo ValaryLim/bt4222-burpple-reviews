@@ -5,7 +5,7 @@ nltk.download('vader_lexicon')
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import fasttext
 from scipy.special import softmax
-#from simpletransformers.classification import ClassificationModel, ClassificationArgs
+from simpletransformers.classification import ClassificationModel, ClassificationArgs
 
 # instantiate models
 LOGREG_VECT = "modelling/saved_models/model_logreg_vectorizer.pkl"
@@ -101,9 +101,6 @@ def base_modelling_pipeline(processed_csv, prediction_csv):
     processed_df['bert_prob_neg'] = bert_probabilities[:, 2]
 
     print("BERT predictions complete")
-    
-    # @ XM comment everything above this line to run vader predictions by calling main.py 
-    # processed_df.to_csv("data/pipeline/baseline_prediction_checkpoint.csv", index=False)
     
     # VADER PREDICTION
     processed_df[["VADER_prob_pos","VADER_prob_neg"]] = load_VADER_model(processed_df)
