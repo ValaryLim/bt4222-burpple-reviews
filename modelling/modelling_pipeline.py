@@ -8,17 +8,17 @@ from scipy.special import softmax
 from simpletransformers.classification import ClassificationModel, ClassificationArgs
 
 # instantiate models
-LOGREG_VECT = "saved_models/model_logreg_vectorizer.pkl"
-LOGREG_MODEL = "saved_models/model_logreg.pkl"
-SVM_VECT = "saved_models/model_SVM_vectorizer.pkl"
-SVM_MODEL = "saved_models/model_SVM.pkl"
-NB_VECT = "saved_models/model_NB_vectorizer.pkl"
-NB_MODEL = "saved_models/model_NB.pkl"
-RF_VECT = "saved_models/model_RF_vectorizer.pkl"
-RF_MODEL = "saved_models/model_RF.pkl"
-FASTTEXT_MODEL = "saved_models/model_fasttext.bin"
-BERT_MODEL = "saved_models/model_bert"
-META_MODEL = "saved_models/model_meta.pkl"
+LOGREG_VECT = "modelling/saved_models/model_logreg_vectorizer.pkl"
+LOGREG_MODEL = "modelling/saved_models/model_logreg.pkl"
+SVM_VECT = "modelling/saved_models/model_SVM_vectorizer.pkl"
+SVM_MODEL = "modelling/saved_models/model_SVM.pkl"
+NB_VECT = "modelling/saved_models/model_NB_vectorizer.pkl"
+NB_MODEL = "modelling/saved_models/model_NB.pkl"
+RF_VECT = "modelling/saved_models/model_RF_vectorizer.pkl"
+RF_MODEL = "modelling/saved_models/model_RF.pkl"
+FASTTEXT_MODEL = "modelling/saved_models/model_fasttext.bin"
+BERT_MODEL = "modelling/saved_models/bert/model_bert_final"
+META_MODEL = "modelling/saved_models/model_meta.pkl"
 
 def fasttext_get_index(lst, tag):
     '''
@@ -36,12 +36,12 @@ def base_modelling_pipeline(processed_csv, prediction_csv):
     processed_df = pd.read_csv(processed_csv)
 
     # LOGISTIC REGRESSION PREDICTION
-    lr_vectorizer = pickle.load(open(LOGREG_VECT, "rb"))
-    lr_model = pickle.load(open(LOGREG_MODEL, "rb"))
-    lr_transformed_text = lr_vectorizer.transform(processed_df.phrase_stem_emoticon_generic)
-    lr_predictions = lr_model.predict_proba(lr_transformed_text)
-    processed_df["logreg_prob_pos"] = lr_predictions[:, 2]
-    processed_df["logreg_prob_neg"] = lr_predictions[:, 0]
+    # lr_vectorizer = pickle.load(open(LOGREG_VECT, "rb"))
+    # lr_model = pickle.load(open(LOGREG_MODEL, "rb"))
+    # lr_transformed_text = lr_vectorizer.transform(processed_df.phrase_stem_emoticon_generic)
+    # lr_predictions = lr_model.predict_proba(lr_transformed_text)
+    # processed_df["logreg_prob_pos"] = lr_predictions[:, 2]
+    # processed_df["logreg_prob_neg"] = lr_predictions[:, 0]
 
     # SUPPORT VECTOR MACHINE PREDICTION
     svm_vectorizer = pickle.load(open(SVM_VECT, "rb"))
@@ -51,53 +51,65 @@ def base_modelling_pipeline(processed_csv, prediction_csv):
     processed_df["SVM_prob_pos"] = svm_predictions[:, 2]
     processed_df["SVM_prob_neg"] = svm_predictions[:, 0]
 
+    processed_df.to_csv("data/pipeline/baseline_prediction_checkpoint4.csv", index=False)
+
     # NAIVE BAYES PREDICTION
-    nb_vectorizer = pickle.load(open(NB_VECT, "rb"))
-    nb_model = pickle.load(open(NB_MODEL, "rb"))
-    nb_transformed_text = nb_vectorizer.transform(processed_df.phrase_stem_emoticon_generic)
-    nb_predictions = nb_model.predict_proba(nb_transformed_text)
-    processed_df["NB_prob_pos"] = nb_predictions[:, 2]
-    processed_df["NB_prob_neg"] = nb_predictions[:, 0]
+    # nb_vectorizer = pickle.load(open(NB_VECT, "rb"))
+    # nb_model = pickle.load(open(NB_MODEL, "rb"))
+    # nb_transformed_text = nb_vectorizer.transform(processed_df.phrase_stem_emoticon_generic)
+    # nb_predictions = nb_model.predict_proba(nb_transformed_text)
+    # processed_df["NB_prob_pos"] = nb_predictions[:, 2]
+    # processed_df["NB_prob_neg"] = nb_predictions[:, 0]
 
     # RANDOM FOREST PREDICTION
-    rf_vectorizer = pickle.load(open(RF_VECT, "rb"))
-    rf_model = pickle.load(open(RF_MODEL, "rb"))
-    rf_transformed_text = rf_vectorizer.transform(processed_df.phrase_stem_emoticon_generic)
-    rf_predictions = rf_model.predict_proba(rf_transformed_text)
-    processed_df["RF_prob_pos"] = rf_predictions[:, 2]
-    processed_df["RF_prob_neg"] = rf_predictions[:, 0]
+    # rf_vectorizer = pickle.load(open(RF_VECT, "rb"))
+    # rf_model = pickle.load(open(RF_MODEL, "rb"))
+    # rf_transformed_text = rf_vectorizer.transform(processed_df.phrase_stem_emoticon_generic)
+    # rf_predictions = rf_model.predict_proba(rf_transformed_text)
+    # processed_df["RF_prob_pos"] = rf_predictions[:, 2]
+    # processed_df["RF_prob_neg"] = rf_predictions[:, 0]
 
-    # FASTTEXT PREDICTION
-    fasttext_model = fasttext.load_model(FASTTEXT_MODEL)
-    fasttext_df = processed_df.copy()
-    # get raw output (('__label__pos', '__label__zer', '__label__neg'), array([0.74627936, 0.19218659, 0.06156404]))
-    fasttext_df['raw_output'] = fasttext_df.apply(lambda x: fasttext_model.predict(x['phrase_stem'].replace("\n", ""), k=-1), axis=1)
-    # get raw prob [0.74627936, 0.19218659, 0.06156404]
-    fasttext_df['raw_prob'] = fasttext_df.apply(lambda x: list(x.raw_output[1]), axis=1)
-    # get pos and neg index
-    fasttext_df['pos_index'] = fasttext_df.apply(lambda x: fasttext_get_index(list(x.raw_output[0]), 'pos'), axis=1)
-    fasttext_df['neg_index'] = fasttext_df.apply(lambda x: fasttext_get_index(list(x.raw_output[0]), 'neg'), axis=1)
-    # get prob_pos and prob_neg
-    fasttext_df['fasttext_prob_pos'] = fasttext_df.apply(lambda x: x.raw_prob[x.pos_index], axis=1)
-    fasttext_df['fasttext_prob_neg'] = fasttext_df.apply(lambda x: x.raw_prob[x.neg_index], axis=1)
-    # add to processed_df
-    processed_df["fasttext_prob_pos"] = fasttext_df['fasttext_prob_pos']
-    processed_df["fasttext_prob_neg"] = fasttext_df['fasttext_prob_neg']
+    # print("LR, SVM, NB, RF predictions complete")
+    # processed_df.to_csv("data/pipeline/baseline_prediction_checkpoint1.csv", index=False)
+
+    # # FASTTEXT PREDICTION
+    # fasttext_model = fasttext.load_model(FASTTEXT_MODEL)
+    # fasttext_df = processed_df.copy()
+    # # get raw output (('__label__pos', '__label__zer', '__label__neg'), array([0.74627936, 0.19218659, 0.06156404]))
+    # fasttext_df['raw_output'] = fasttext_df.apply(lambda x: fasttext_model.predict(x['phrase_stem'].replace("\n", ""), k=-1), axis=1)
+    # # get raw prob [0.74627936, 0.19218659, 0.06156404]
+    # fasttext_df['raw_prob'] = fasttext_df.apply(lambda x: list(x.raw_output[1]), axis=1)
+    # # get pos and neg index
+    # fasttext_df['pos_index'] = fasttext_df.apply(lambda x: fasttext_get_index(list(x.raw_output[0]), 'pos'), axis=1)
+    # fasttext_df['neg_index'] = fasttext_df.apply(lambda x: fasttext_get_index(list(x.raw_output[0]), 'neg'), axis=1)
+    # # get prob_pos and prob_neg
+    # fasttext_df['fasttext_prob_pos'] = fasttext_df.apply(lambda x: x.raw_prob[x.pos_index], axis=1)
+    # fasttext_df['fasttext_prob_neg'] = fasttext_df.apply(lambda x: x.raw_prob[x.neg_index], axis=1)
+    # # add to processed_df
+    # processed_df["fasttext_prob_pos"] = fasttext_df['fasttext_prob_pos']
+    # processed_df["fasttext_prob_neg"] = fasttext_df['fasttext_prob_neg']
+
+    # print("Fasttext predictions complete")
+    # processed_df.to_csv("data/pipeline/baseline_prediction_checkpoint2.csv", index=False)
 
     # BERT PREDICTION
-    bert_model_args = ClassificationArgs(num_train_epochs=2, learning_rate=5e-5)
-    bert_model = ClassificationModel(model_type = 'bert', \
-                                     model_name = BERT_MODEL, \
-                                     args = bert_model_args, use_cuda = False)
-    bert_pred, bert_raw_outputs = bert_model.predict(processed_df.phrase)
-    # convert raw output to probabilities
-    bert_probabilities = softmax(bert_raw_outputs, axis=1)
-    processed_df['bert_prob_pos'] = bert_probabilities[:, 1]
-    processed_df['bert_prob_neg'] = bert_probabilities[:, 2]
-    
+    # print("start:")
+    # bert_model_args = ClassificationArgs(num_train_epochs=2, learning_rate=5e-5)
+    # bert_model = ClassificationModel(model_type = 'bert', \
+    #                                  model_name = BERT_MODEL, \
+    #                                  args = bert_model_args, use_cuda = False)
+    # print("BERT model loaded")
+    # bert_pred, bert_raw_outputs = bert_model.predict(processed_df.phrase)
+    # # convert raw output to probabilities
+    # bert_probabilities = softmax(bert_raw_outputs, axis=1)
+    # processed_df['bert_prob_pos'] = bert_probabilities[:, 1]
+    # processed_df['bert_prob_neg'] = bert_probabilities[:, 2]
+
+    # print("BERT predictions complete")
+    # processed_df.to_csv("data/pipeline/baseline_prediction_checkpoint3.csv", index=False)
+
     # VADER PREDICTION
     processed_df[["VADER_prob_pos","VADER_prob_neg"]] = load_VADER_model(processed_df)
-    
     
     processed_df.to_csv(prediction_csv, index=False)
     print("BASELINE PREDICTIONS COMPLETE")
