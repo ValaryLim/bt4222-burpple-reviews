@@ -17,7 +17,8 @@ NB_MODEL = "modelling/saved_models/model_NB.pkl"
 RF_VECT = "modelling/saved_models/model_RF_vectorizer.pkl"
 RF_MODEL = "modelling/saved_models/model_RF.pkl"
 FASTTEXT_MODEL = "modelling/saved_models/model_fasttext.bin"
-BERT_MODEL = "modelling/saved_models/bert/model_bert_final"
+# the bert model has to be downloaded from a link I've shared on GDrive
+BERT_MODEL = "modelling/saved_models/model_bert"
 META_MODEL = "modelling/saved_models/model_meta.pkl"
 
 def fasttext_get_index(lst, tag):
