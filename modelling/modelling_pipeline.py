@@ -8,17 +8,18 @@ from scipy.special import softmax
 from simpletransformers.classification import ClassificationModel, ClassificationArgs
 
 # instantiate models
-LOGREG_VECT = "saved_models/model_logreg_vectorizer.pkl"
-LOGREG_MODEL = "saved_models/model_logreg.pkl"
-SVM_VECT = "saved_models/model_SVM_vectorizer.pkl"
-SVM_MODEL = "saved_models/model_SVM.pkl"
-NB_VECT = "saved_models/model_NB_vectorizer.pkl"
-NB_MODEL = "saved_models/model_NB.pkl"
-RF_VECT = "saved_models/model_RF_vectorizer.pkl"
-RF_MODEL = "saved_models/model_RF.pkl"
-FASTTEXT_MODEL = "saved_models/model_fasttext.bin"
-BERT_MODEL = "saved_models/model_bert"
-META_MODEL = "saved_models/model_meta.pkl"
+LOGREG_VECT = "modelling/saved_models/model_logreg_vectorizer.pkl"
+LOGREG_MODEL = "modelling/saved_models/model_logreg.pkl"
+SVM_VECT = "modelling/saved_models/model_SVM_vectorizer.pkl"
+SVM_MODEL = "modelling/saved_models/model_SVM.pkl"
+NB_VECT = "modelling/saved_models/model_NB_vectorizer.pkl"
+NB_MODEL = "modelling/saved_models/model_NB.pkl"
+RF_VECT = "modelling/saved_models/model_RF_vectorizer.pkl"
+RF_MODEL = "modelling/saved_models/model_RF.pkl"
+FASTTEXT_MODEL = "modelling/saved_models/model_fasttext.bin"
+# the bert model has to be downloaded from a link I've shared on GDrive
+BERT_MODEL = "modelling/saved_models/model_bert"
+META_MODEL = "modelling/saved_models/model_meta.pkl"
 
 def fasttext_get_index(lst, tag):
     '''
@@ -34,11 +35,11 @@ def base_modelling_pipeline(processed_csv, prediction_csv):
     '''
     # READ PROCESSED DATA
     processed_df = pd.read_csv(processed_csv)
-
+    
     # LOGISTIC REGRESSION PREDICTION
     lr_vectorizer = pickle.load(open(LOGREG_VECT, "rb"))
     lr_model = pickle.load(open(LOGREG_MODEL, "rb"))
-    lr_transformed_text = lr_vectorizer.transform(processed_df.phrase_stem_emoticon_generic)
+    lr_transformed_text = lr_vectorizer.transform(processed_df.phrase_stem_emoticon_unique)
     lr_predictions = lr_model.predict_proba(lr_transformed_text)
     processed_df["logreg_prob_pos"] = lr_predictions[:, 2]
     processed_df["logreg_prob_neg"] = lr_predictions[:, 0]
@@ -46,7 +47,7 @@ def base_modelling_pipeline(processed_csv, prediction_csv):
     # SUPPORT VECTOR MACHINE PREDICTION
     svm_vectorizer = pickle.load(open(SVM_VECT, "rb"))
     svm_model = pickle.load(open(SVM_MODEL, "rb"))
-    svm_transformed_text = svm_vectorizer.transform(processed_df.phrase_emoticon_generic)
+    svm_transformed_text = svm_vectorizer.transform(processed_df.phrase)
     svm_predictions = svm_model.predict_proba(svm_transformed_text)
     processed_df["SVM_prob_pos"] = svm_predictions[:, 2]
     processed_df["SVM_prob_neg"] = svm_predictions[:, 0]
@@ -67,6 +68,8 @@ def base_modelling_pipeline(processed_csv, prediction_csv):
     processed_df["RF_prob_pos"] = rf_predictions[:, 2]
     processed_df["RF_prob_neg"] = rf_predictions[:, 0]
 
+    print("LR, SVM, NB, RF predictions complete")
+
     # FASTTEXT PREDICTION
     fasttext_model = fasttext.load_model(FASTTEXT_MODEL)
     fasttext_df = processed_df.copy()
@@ -84,6 +87,8 @@ def base_modelling_pipeline(processed_csv, prediction_csv):
     processed_df["fasttext_prob_pos"] = fasttext_df['fasttext_prob_pos']
     processed_df["fasttext_prob_neg"] = fasttext_df['fasttext_prob_neg']
 
+    print("Fasttext predictions complete")
+
     # BERT PREDICTION
     bert_model_args = ClassificationArgs(num_train_epochs=2, learning_rate=5e-5)
     bert_model = ClassificationModel(model_type = 'bert', \
@@ -94,15 +99,17 @@ def base_modelling_pipeline(processed_csv, prediction_csv):
     bert_probabilities = softmax(bert_raw_outputs, axis=1)
     processed_df['bert_prob_pos'] = bert_probabilities[:, 1]
     processed_df['bert_prob_neg'] = bert_probabilities[:, 2]
+
+    print("BERT predictions complete")
     
     # VADER PREDICTION
     processed_df[["VADER_prob_pos","VADER_prob_neg"]] = load_VADER_model(processed_df)
     
-    
     processed_df.to_csv(prediction_csv, index=False)
     print("BASELINE PREDICTIONS COMPLETE")
 
-def ensemble_modelling_pipeline(prediction_csv, ensemble_file):
+
+def meta_modelling_pipeline(prediction_csv, ensemble_file):
     '''
     Retrieves predictions for each baseline model and outputs final prediction using meta model
 
@@ -118,19 +125,15 @@ def ensemble_modelling_pipeline(prediction_csv, ensemble_file):
     meta_model = pickle.load(open(META_MODEL, "rb"))
 
     # fit model
-    predictions_df[["prob_neg","prob_neu","prob_pos"]] = meta_model.predict_proba(predictions_df[['bert_prob_pos', 'bert_prob_neg', 'fasttext_prob_pos',
+    predictions = meta_model.predict_proba(predictions_df[['bert_prob_pos', 'bert_prob_neg', 'fasttext_prob_pos',
        'fasttext_prob_neg', 'logreg_prob_pos', 'logreg_prob_neg',
        'NB_prob_pos', 'NB_prob_neg', 'RF_prob_pos', 'RF_prob_neg',
-       'SVM_prob_pos', 'SVM_prob_neg', 'VADER_prob_pos', 'VADER_prob_neg',
-       'label']])[:, 0:2]
+       'SVM_prob_pos', 'SVM_prob_neg', 'VADER_prob_pos', 'VADER_prob_neg']])[:, 0:3]
+    predictions_df[["prob_neg","prob_neu","prob_pos"]] = predictions
     
-
-
-    # i want the predictions in this format!
-    ensemble_predictions = pd.DataFrame(data=predictions_df,columns=["restaurant-code", "review_title", "review_body", "account_name", 
-        "account_id",  "account_level", "account_photo", "review_photo", "location", "aspect", 
+    ensemble_predictions = pd.DataFrame(data=predictions_df,columns=["restaurant_code", "review_title", "review_body", "review_date", "account_name", 
+        "account_id",  "account_level", "account_photo", "review_photo", "scraped_date", "location", "aspect", 
         "prob_pos", "prob_neu", "prob_neg"]) 
-    
     
     # save ensemble predictions
     ensemble_predictions.to_csv(ensemble_file, index=False)
@@ -209,10 +212,10 @@ def load_VADER_model(df):
     dataframe["pos"] = dataframe["polarity_scores"].map(lambda score_dict : score_dict["pos"])
     dataframe["neg"] = dataframe["polarity_scores"].map(lambda score_dict : score_dict["neg"])
 
+    model_name = "VADER"
     # Create Dataframe and output
-    df = pd.DataFrame(data=dataframe[["neg","pos","label"]].values, columns = [model_name+'_prob_neg', model_name+'_prob_pos',"label"])
-    # df.drop(columns= [model_name+'_prob_neu'])
-    ordered_cols = [model_name+'_prob_pos',model_name+'_prob_neg',"label"]
+    df = pd.DataFrame(data=dataframe[["neg","pos"]].values, columns = [model_name+'_prob_neg', model_name+'_prob_pos'])
+    ordered_cols = [model_name+'_prob_pos',model_name+'_prob_neg']
     df = df[ordered_cols]
     
     return df
