@@ -12,7 +12,7 @@ REVIEW_CSV = "data/pipeline/reviews.csv"
 PREPROCESSED_CSV = "data/pipeline/reviews_preprocessed.csv"
 RULE_MINED_CSV = "data/pipeline/rule_mined.csv"
 POSTPROCESSED_CSV = "data/pipeline/reviews_postprocessed.csv"
-BASELINE_CSV = "data/pipeline/baseline_prediction.csv"
+BASELINE_CSV = "data/pipeline/baseline_prediction.csv" 
 ENSEMBLE_CSV = "data/pipeline/ensemble_prediction.csv"
 REVIEW_FINAL = "data/pipeline/reviews_final.csv"
 RESTAURANT_FINAL = "data/pipeline/restaurants_final.csv"
@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     # modelling
     modelling.base_modelling_pipeline(POSTPROCESSED_CSV, BASELINE_CSV)
-    # modelling.meta_modelling_pipeline(PREDICTIONS_CSV, ENSEMBLE_CSV)
+    modelling.meta_modelling_pipeline(BASELINE_CSV, ENSEMBLE_CSV)
 
     # scoring
     utils.scoring_pipeline(ENSEMBLE_CSV, RESTAURANT_DETAILED_CSV, REVIEW_FINAL, RESTAURANT_FINAL)
