@@ -44,7 +44,7 @@ CONTENT_STYLE = {
 
 #### HEADER ##########################################################
 # retrieve unique restaurants list
-RESTAURANTS_CSV_PATH = 'data/dummy_restaurants.csv'
+RESTAURANTS_CSV_PATH = 'data/restaurants_final.csv'
 restaurants_data = pd.read_csv(RESTAURANTS_CSV_PATH)
 restaurants_list = list(restaurants_data.restaurant_name.unique())
 restaurants_list.sort() # sort in alphabetical order
@@ -224,13 +224,12 @@ def generate_restaurants_list(data, aspect_input):
     restaurant_overall_rating = round(data.review_rating_overall, 2)
     
     # retrieve restaurant photo
+    restaurant_photo = 'assets/default_img.jpeg' # change to default image
     if data.restaurant_photo != None:
         restaurant_photos_list = data.restaurant_photo.split("'")
         for photo in restaurant_photos_list:
             if len(photo) > 10: # check for valid link
                 restaurant_photo = photo
-    else:
-        restaurant_photo = '' # change to default image
 
     # retrieve restaurant categories
     restaurant_categories = ''
@@ -275,7 +274,7 @@ def generate_restaurants_list(data, aspect_input):
         html.Br(),
         html.Div([
             dbc.Row([
-                dbc.Col(html.Img(src=restaurant_photo, style={"height": "100%", "width": "100%", "padding": "0.5rem"}), width=2),
+                dbc.Col(html.Img(src=restaurant_photo, style={"width": "100%", "padding": "0.5rem"}), width=2),
                 dbc.Col([
                     dbc.Row(dcc.Link(html.H4(restaurant_name), href=f'/restaurant-{restaurant_code}', style={'color': 'black'})),
                     dbc.Row(html.H6(restaurant_location)), 

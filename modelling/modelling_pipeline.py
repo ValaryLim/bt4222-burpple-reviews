@@ -39,7 +39,7 @@ def base_modelling_pipeline(processed_csv, prediction_csv):
     # LOGISTIC REGRESSION PREDICTION
     lr_vectorizer = pickle.load(open(LOGREG_VECT, "rb"))
     lr_model = pickle.load(open(LOGREG_MODEL, "rb"))
-    lr_transformed_text = lr_vectorizer.transform(processed_df.phrase_stem_emoticon_generic)
+    lr_transformed_text = lr_vectorizer.transform(processed_df.phrase_stem_emoticon_unique)
     lr_predictions = lr_model.predict_proba(lr_transformed_text)
     processed_df["logreg_prob_pos"] = lr_predictions[:, 2]
     processed_df["logreg_prob_neg"] = lr_predictions[:, 0]
@@ -47,7 +47,7 @@ def base_modelling_pipeline(processed_csv, prediction_csv):
     # SUPPORT VECTOR MACHINE PREDICTION
     svm_vectorizer = pickle.load(open(SVM_VECT, "rb"))
     svm_model = pickle.load(open(SVM_MODEL, "rb"))
-    svm_transformed_text = svm_vectorizer.transform(processed_df.phrase_emoticon_generic)
+    svm_transformed_text = svm_vectorizer.transform(processed_df.phrase_stem_emoticon_generic)
     svm_predictions = svm_model.predict_proba(svm_transformed_text)
     processed_df["SVM_prob_pos"] = svm_predictions[:, 2]
     processed_df["SVM_prob_neg"] = svm_predictions[:, 0]
@@ -102,12 +102,12 @@ def base_modelling_pipeline(processed_csv, prediction_csv):
 
     print("BERT predictions complete")
     
-
     # VADER PREDICTION
     processed_df[["VADER_prob_pos","VADER_prob_neg"]] = load_VADER_model(processed_df)
     
     processed_df.to_csv(prediction_csv, index=False)
     print("BASELINE PREDICTIONS COMPLETE")
+
 
 def meta_modelling_pipeline(prediction_csv, ensemble_file):
     '''
@@ -131,13 +131,9 @@ def meta_modelling_pipeline(prediction_csv, ensemble_file):
        'SVM_prob_pos', 'SVM_prob_neg', 'VADER_prob_pos', 'VADER_prob_neg']])[:, 0:3]
     predictions_df[["prob_neg","prob_neu","prob_pos"]] = predictions
     
-
-
-    # i want the predictions in this format!
-    ensemble_predictions = pd.DataFrame(data=predictions_df,columns=["restaurant_code", "review_title", "review_body", "account_name", 
-        "account_id",  "account_level", "account_photo", "review_photo", "location", "aspect", 
+    ensemble_predictions = pd.DataFrame(data=predictions_df,columns=["restaurant_code", "review_title", "review_body", "review_date", "account_name", 
+        "account_id",  "account_level", "account_photo", "review_photo", "scraped_date", "location", "aspect", 
         "prob_pos", "prob_neu", "prob_neg"]) 
-    
     
     # save ensemble predictions
     ensemble_predictions.to_csv(ensemble_file, index=False)
