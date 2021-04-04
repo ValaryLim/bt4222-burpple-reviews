@@ -265,7 +265,7 @@ def scrape_details_by_restaurant(restaurant_code, browser):
     return restaurant_description, restaurant_hours, restaurant_address, restaurant_number, restaurant_website, restaurant_photos
 
 def generate_restaurant_details(restaurant_csv, browser):
-    restaurant_df = pd.read_csv(restaurant_csv)[7001:10000]
+    restaurant_df = pd.read_csv(restaurant_csv) #[7001:10000]
     codes, descriptions, hours, addresses, numbers, websites, photos = [], [], [], [], [], [], []
     count = 0
     for code in restaurant_df.restaurant_code:
@@ -278,7 +278,7 @@ def generate_restaurant_details(restaurant_csv, browser):
         websites.append(website)
         photos.append(photo)
         count += 1
-        if (count % 50 == 0):
+        if (count % 100 == 0):
             print(str(count) + " out of " + str(len(restaurant_df)) + " done")
 
     restaurant_description_df = pd.DataFrame({
@@ -335,12 +335,11 @@ def scraping_pipeline(restaurant_csv, restaurant_detailed_csv, review_csv):
 
 if __name__ == "__main__":
     # instantiate directories
-    RESTAURANT_LIST_DIR = "../data/raw/restaurant_lists_mar/"
-    RESTAURANT_CSV = "../data/processed/restaurant_all_mar.csv"
-
-    RESTAURANT_DETAILED_CSV = "../data/processed/restaurant_all_detailed_mar.csv"
-    RESTAURANT_REVIEWS_DIR = "../data/raw/restaurant_reviews_mar/"
-    REVIEWS_CSV = "../data/processed/reviews_all_mar.csv" 
+    RESTAURANT_LIST_DIR = "../data/raw/restaurant_lists_apr/"
+    RESTAURANT_CSV = "../data/processed/restaurant_all_apr.csv"
+    RESTAURANT_DETAILED_CSV = "../data/processed/restaurant_all_detailed_apr_5.csv"
+    # RESTAURANT_REVIEWS_DIR = "../data/raw/restaurant_reviews_mar/"
+    # REVIEWS_CSV = "../data/processed/reviews_all_mar.csv" 
 
     # configure chrome options 
     chrome_options = Options()  
@@ -355,7 +354,9 @@ if __name__ == "__main__":
 
     with Chrome("./utils/chromedriver", options=chrome_options) as browser:
         # generate restaurants
-        generate_restaurants(restaurant_list_dir=RESTAURANT_LIST_DIR, restaurant_csv=RESTAURANT_CSV, browser=browser)
+        # generate_restaurants(restaurant_list_dir=RESTAURANT_LIST_DIR, browser=browser)
+        # compile restaurants 
+        # utils.compile(raw_dir=RESTAURANT_LIST_DIR, compiled_dir=RESTAURANT_CSV)
 
         # generate restaurant details
         restaurant_detailed_df = generate_restaurant_details(restaurant_csv=RESTAURANT_CSV, browser=browser)
@@ -365,4 +366,4 @@ if __name__ == "__main__":
         generate_reviews(restaurant_csv=RESTAURANT_CSV, restaurant_reviews_dir=RESTAURANT_REVIEWS_DIR, browser=browser)
 
         # compile restaurants 
-        compile(raw_dir=RESTAURANT_REVIEWS_DIR, compiled_dir=REVIEWS_CSV)
+        # utils.compile(raw_dir=RESTAURANT_REVIEWS_DIR, compiled_dir=REVIEWS_CSV)
