@@ -14,7 +14,6 @@ import math
 from app import app
 
 
-
 #### STYLES ##########################################################
 # style arguments for header
 HEADER_STYLE = {
@@ -44,7 +43,8 @@ CONTENT_STYLE = {
 
 #### HEADER ##########################################################
 # retrieve unique restaurants list
-RESTAURANTS_CSV_PATH = 'data/restaurants_final.csv'
+# RESTAURANTS_CSV_PATH = 'data/restaurants_final.csv'
+RESTAURANTS_CSV_PATH = 'https://drive.google.com/uc?id=1TB9jlgeZO5P5jsyCsrbu8IV9QPMwiysC'
 restaurants_data = pd.read_csv(RESTAURANTS_CSV_PATH)
 restaurants_list = list(restaurants_data.restaurant_name.unique())
 restaurants_list.sort() # sort in alphabetical order

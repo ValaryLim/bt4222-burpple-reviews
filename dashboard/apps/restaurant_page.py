@@ -39,8 +39,10 @@ CONTENT_STYLE = {
     "zIndex": 0
 }
 
-RESTAURANT_URL = 'data/restaurants_final.csv'
-REVIEW_URL = 'data/reviews_final.csv'
+# RESTAURANT_URL = 'data/restaurants_final.csv'
+# REVIEW_URL = 'data/reviews_final.csv'
+RESTAURANT_URL = 'https://drive.google.com/uc?id=1TB9jlgeZO5P5jsyCsrbu8IV9QPMwiysC'
+REVIEW_URL = 'https://drive.google.com/uc?id=1m2BC9hSQVogybQDklAgEBkMab2ok7gt7'
 CATEGORIES = ['Italian', 'Malay', 'Japanese', 'Chinese', 'Western', 'Korean',\
     'Thai', 'Vietnamese', 'Mexican', 'Indian', 'Local Delights', 'Desserts', \
     'Healthy', 'Cafes & Coffee', 'Halal', 'Beverages', 'Others']
