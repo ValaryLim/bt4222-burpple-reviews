@@ -39,8 +39,12 @@ CONTENT_STYLE = {
     "zIndex": 0
 }
 
-RESTAURANT_URL = 'data/restaurants_final.csv'
-REVIEW_URL = 'data/reviews_final.csv'
+# RESTAURANT_URL = 'data/restaurants_final.csv'
+# REVIEW_URL = 'data/reviews_final.csv'
+RESTAURANT_URL = 'https://raw.githubusercontent.com/ValaryLim/bt4222-burpple-reviews/yanjean_deploy/dashboard/data_final/restaurants_final.csv'
+REVIEWS_CSV_PATH_1 = 'https://raw.githubusercontent.com/ValaryLim/bt4222-burpple-reviews/yanjean_deploy/dashboard/data_final/reviews_final_part1.csv'
+REVIEWS_CSV_PATH_2 = 'https://raw.githubusercontent.com/ValaryLim/bt4222-burpple-reviews/yanjean_deploy/dashboard/data_final/reviews_final_part2.csv'
+
 CATEGORIES = ['Italian', 'Malay', 'Japanese', 'Chinese', 'Western', 'Korean',\
     'Thai', 'Vietnamese', 'Mexican', 'Indian', 'Local Delights', 'Desserts', \
     'Healthy', 'Cafes & Coffee', 'Halal', 'Beverages', 'Others']
@@ -49,7 +53,10 @@ ASPECTS = ['Overall', 'Food', 'Portion', 'Price', 'Time', 'Service', 'Ambience']
 # load restaurant and review data
 restaurant_df = pd.read_csv(RESTAURANT_URL)
 restaurant_df = utils.process_csv_lists(restaurant_df, columns=["restaurant_photo"])
-review_df = pd.read_csv(REVIEW_URL)
+reviews_data_1 = pd.read_csv(REVIEWS_CSV_PATH_1)
+reviews_data_2 = pd.read_csv(REVIEWS_CSV_PATH_2)
+review_df= reviews_data_1.append(reviews_data_2).reset_index(drop=True)
+# review_df = pd.read_csv(REVIEW_URL)
 
 # header
 header = html.Div(

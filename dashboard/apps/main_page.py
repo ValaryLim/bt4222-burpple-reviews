@@ -14,7 +14,6 @@ import math
 from app import app
 
 
-
 #### STYLES ##########################################################
 # style arguments for header
 HEADER_STYLE = {
@@ -44,10 +43,23 @@ CONTENT_STYLE = {
 
 #### HEADER ##########################################################
 # retrieve unique restaurants list
-RESTAURANTS_CSV_PATH = 'data/restaurants_final.csv'
+# RESTAURANTS_CSV_PATH = 'data/restaurants_final.csv' # LOCAL DATA SOURCE
+RESTAURANTS_CSV_PATH = 'https://raw.githubusercontent.com/ValaryLim/bt4222-burpple-reviews/yanjean_deploy/dashboard/data_final/restaurants_final.csv'
 restaurants_data = pd.read_csv(RESTAURANTS_CSV_PATH)
 restaurants_list = list(restaurants_data.restaurant_name.unique())
 restaurants_list.sort() # sort in alphabetical order
+
+# retrieve number of reviews per restaurant
+# REVIEWS_CSV_PATH = 'data/reviews_final.csv' # LOCAL DATA SOURCE
+# reviews_data = pd.read_csv(REVIEWS_CSV_PATH)
+
+REVIEWS_CSV_PATH_1 = 'https://raw.githubusercontent.com/ValaryLim/bt4222-burpple-reviews/yanjean_deploy/dashboard/data_final/reviews_final_part1.csv'
+REVIEWS_CSV_PATH_2 = 'https://raw.githubusercontent.com/ValaryLim/bt4222-burpple-reviews/yanjean_deploy/dashboard/data_final/reviews_final_part2.csv'
+reviews_data_1 = pd.read_csv(REVIEWS_CSV_PATH_1)
+reviews_data_2 = pd.read_csv(REVIEWS_CSV_PATH_2)
+reviews_data = reviews_data_1.append(reviews_data_2).reset_index(drop=True)
+
+reviews_per_restaurant = reviews_data['restaurant_code'].value_counts()
 
 # retrieve unique prices
 prices_list = list(restaurants_data.price_per_pax.unique())
@@ -113,6 +125,7 @@ category_input = html.Div([
 )
 
 # price range input
+max_price = 200 # RESTRICTED to reduce clutter
 price_input = html.Div([
     html.Div(id='output-range-slider', style={'text-align': 'center'}),
     dcc.RangeSlider(
@@ -135,6 +148,8 @@ price_input = html.Div([
     [Input('price-input', 'value')]
 )
 def update_output(value):
+    if value[1] == 200:
+        return f'Price Range: ${value[0]}-{value[1]}+'
     return f'Price Range: ${value[0]}-{value[1]}'
 
 # search button
@@ -228,7 +243,7 @@ def generate_restaurants_list(data, aspect_input):
     if data.restaurant_photo != None:
         restaurant_photos_list = data.restaurant_photo.split("'")
         for photo in restaurant_photos_list:
-            if len(photo) > 10: # check for valid link
+            if photo[:8] == 'https://': # check for valid link
                 restaurant_photo = photo
 
     # retrieve restaurant categories
@@ -312,6 +327,9 @@ def render_main_page(n_clicks, aspect, order, restaurant, location, price, categ
     restaurants_data = pd.read_csv(RESTAURANTS_CSV_PATH)
     restaurants_filter = restaurants_data.copy()
 
+    # remove noise
+    restaurants_filter = restaurants_filter.loc[restaurants_filter['restaurant_code'] != '#NAME?']
+
     subtitle = "Showing results for "
 
     # filter by restaurant name
@@ -330,10 +348,16 @@ def render_main_page(n_clicks, aspect, order, restaurant, location, price, categ
         restaurants_filter = restaurants_filter.loc[restaurants_filter[category] == 1]
         subtitle += f' "{category} category" '
     # filter by price
-    if (price[0] != 0) | (price[1] != 200): # default is [0, 200], check for deviations from default
+    if (price[0] != 0) & (price[1] < 200): # default is [0, 200], check for deviations from default
         restaurants_filter = restaurants_filter.loc[restaurants_filter.price_per_pax <= price[1]]
         restaurants_filter = restaurants_filter.loc[restaurants_filter.price_per_pax >= price[0]]
         subtitle += f' "${price[0]}-{price[1]} per pax" '
+    elif (price[0] != 0) & (price[1] == 200): # don't filter for upper limit, show restaurants with price > 200
+        restaurants_filter = restaurants_filter.loc[restaurants_filter.price_per_pax >= price[0]]
+        subtitle += f' "${price[0]}-200+ per pax" '
+    elif (price[0] == 0) & (price[1] < 200): # only filter for upper
+        restaurants_filter = restaurants_filter.loc[restaurants_filter.price_per_pax <= price[1]]
+        subtitle += f' "$0-{price[1]} per pax" '
 
     # sort by overall review score
     restaurants_filter = restaurants_filter.sort_values(by=['review_rating_overall'], axis=0, ascending=False)
@@ -351,6 +375,8 @@ def render_main_page(n_clicks, aspect, order, restaurant, location, price, categ
     if (n_clicks == None) | (len(restaurants_filter) == len(restaurants_data)):
         subtitle = "Top restaurants in Singapore"
         # display top 20 results
+        restaurants_popular = [x for x in reviews_per_restaurant.index if reviews_per_restaurant[x] >= 10]
+        restaurants_filter = restaurants_filter.loc[(restaurants_filter['restaurant_code'].isin(restaurants_popular))]
         restaurants_filter = restaurants_filter.iloc[:20]
 
     # generate data
