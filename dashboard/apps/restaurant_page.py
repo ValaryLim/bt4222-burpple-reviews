@@ -39,10 +39,12 @@ CONTENT_STYLE = {
     "zIndex": 0
 }
 
-# RESTAURANT_URL = 'data/restaurants_final.csv'
+# RESTAURANT_URL = 'data/restaurants_final.csv'
 # REVIEW_URL = 'data/reviews_final.csv'
 RESTAURANT_URL = 'https://drive.google.com/uc?id=1TB9jlgeZO5P5jsyCsrbu8IV9QPMwiysC'
-REVIEW_URL = 'https://drive.google.com/uc?id=1m2BC9hSQVogybQDklAgEBkMab2ok7gt7'
+REVIEWS_CSV_PATH_1 = 'https://drive.google.com/uc?id=1zwl0mIUjzDi_mSJyEuhGQnZJ1DhofFsR'
+REVIEWS_CSV_PATH_2 = 'https://drive.google.com/uc?id=1R4iJe-34z41r2gmb6GYSlFmfyVa3iiyU'
+
 CATEGORIES = ['Italian', 'Malay', 'Japanese', 'Chinese', 'Western', 'Korean',\
     'Thai', 'Vietnamese', 'Mexican', 'Indian', 'Local Delights', 'Desserts', \
     'Healthy', 'Cafes & Coffee', 'Halal', 'Beverages', 'Others']
@@ -51,7 +53,10 @@ ASPECTS = ['Overall', 'Food', 'Portion', 'Price', 'Time', 'Service', 'Ambience']
 # load restaurant and review data
 restaurant_df = pd.read_csv(RESTAURANT_URL)
 restaurant_df = utils.process_csv_lists(restaurant_df, columns=["restaurant_photo"])
-review_df = pd.read_csv(REVIEW_URL)
+reviews_data_1 = pd.read_csv(REVIEWS_CSV_PATH_1)
+reviews_data_2 = pd.read_csv(REVIEWS_CSV_PATH_2)
+review_df= reviews_data_1.append(reviews_data_2).reset_index(drop=True)
+# review_df = pd.read_csv(REVIEW_URL)
 
 # header
 header = html.Div(
