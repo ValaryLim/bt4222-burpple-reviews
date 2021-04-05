@@ -44,7 +44,7 @@ CONTENT_STYLE = {
 #### HEADER ##########################################################
 # retrieve unique restaurants list
 # RESTAURANTS_CSV_PATH = 'data/restaurants_final.csv' # LOCAL DATA SOURCE
-RESTAURANTS_CSV_PATH = 'https://drive.google.com/uc?id=1TB9jlgeZO5P5jsyCsrbu8IV9QPMwiysC' # GOOGLE DRIVE DATA
+RESTAURANTS_CSV_PATH = 'https://raw.githubusercontent.com/ValaryLim/bt4222-burpple-reviews/yanjean_deploy/dashboard/data_final/restaurants_final.csv'
 restaurants_data = pd.read_csv(RESTAURANTS_CSV_PATH)
 restaurants_list = list(restaurants_data.restaurant_name.unique())
 restaurants_list.sort() # sort in alphabetical order
@@ -53,8 +53,8 @@ restaurants_list.sort() # sort in alphabetical order
 # REVIEWS_CSV_PATH = 'data/reviews_final.csv' # LOCAL DATA SOURCE
 # reviews_data = pd.read_csv(REVIEWS_CSV_PATH)
 
-REVIEWS_CSV_PATH_1 = 'https://drive.google.com/uc?id=1zwl0mIUjzDi_mSJyEuhGQnZJ1DhofFsR' # GOOGLE DRIVE DATA
-REVIEWS_CSV_PATH_2 = 'https://drive.google.com/uc?id=1R4iJe-34z41r2gmb6GYSlFmfyVa3iiyU'
+REVIEWS_CSV_PATH_1 = 'https://raw.githubusercontent.com/ValaryLim/bt4222-burpple-reviews/yanjean_deploy/dashboard/data_final/reviews_final_part1.csv'
+REVIEWS_CSV_PATH_2 = 'https://raw.githubusercontent.com/ValaryLim/bt4222-burpple-reviews/yanjean_deploy/dashboard/data_final/reviews_final_part2.csv'
 reviews_data_1 = pd.read_csv(REVIEWS_CSV_PATH_1)
 reviews_data_2 = pd.read_csv(REVIEWS_CSV_PATH_2)
 reviews_data = reviews_data_1.append(reviews_data_2).reset_index(drop=True)

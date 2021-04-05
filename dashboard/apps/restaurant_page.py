@@ -41,9 +41,9 @@ CONTENT_STYLE = {
 
 # RESTAURANT_URL = 'data/restaurants_final.csv'
 # REVIEW_URL = 'data/reviews_final.csv'
-RESTAURANT_URL = 'https://drive.google.com/uc?id=1TB9jlgeZO5P5jsyCsrbu8IV9QPMwiysC'
-REVIEWS_CSV_PATH_1 = 'https://drive.google.com/uc?id=1zwl0mIUjzDi_mSJyEuhGQnZJ1DhofFsR'
-REVIEWS_CSV_PATH_2 = 'https://drive.google.com/uc?id=1R4iJe-34z41r2gmb6GYSlFmfyVa3iiyU'
+RESTAURANT_URL = 'https://raw.githubusercontent.com/ValaryLim/bt4222-burpple-reviews/yanjean_deploy/dashboard/data_final/restaurants_final.csv'
+REVIEWS_CSV_PATH_1 = 'https://raw.githubusercontent.com/ValaryLim/bt4222-burpple-reviews/yanjean_deploy/dashboard/data_final/reviews_final_part1.csv'
+REVIEWS_CSV_PATH_2 = 'https://raw.githubusercontent.com/ValaryLim/bt4222-burpple-reviews/yanjean_deploy/dashboard/data_final/reviews_final_part2.csv'
 
 CATEGORIES = ['Italian', 'Malay', 'Japanese', 'Chinese', 'Western', 'Korean',\
     'Thai', 'Vietnamese', 'Mexican', 'Indian', 'Local Delights', 'Desserts', \
