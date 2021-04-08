@@ -271,6 +271,8 @@ def generate_phrase_list(row, phrase, aspect):
         "restaurant_code": row["restaurant_code"],
         "review_title": row["review_title"],
         "review_body": row["review_body"],
+        "review_title_raw": row["review_title_raw"],
+        "review_body_raw": row["review_body_raw"], 
         "review_date": row["review_date"],
         "account_name": row["account_name"],
         "account_id": row["account_id"],
