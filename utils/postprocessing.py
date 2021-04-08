@@ -92,7 +92,8 @@ def postprocessing_pipeline(rule_mined_csv, postprocessed_csv):
 
     # aggregate phrases
     postprocessed_df = rule_mined_df.groupby(["restaurant_code", "review_title", "review_body", "review_date",\
-        "account_name", "account_id", "account_level", "account_photo", "review_photo", "scraped_date", "aspect"
+        "review_title_raw", "review_body_raw", "account_name", "account_id", "account_level", "account_photo", \
+        "review_photo", "scraped_date", "aspect"
         ], as_index=False).agg({
             "phrase": " ".join,
             "phrase_lemma":" ".join,

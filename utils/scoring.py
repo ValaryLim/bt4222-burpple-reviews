@@ -44,7 +44,7 @@ def aggregate_reviews(df):
     df["review_rating_time"] = time
 
     # aggregate ratings
-    aggregated_df = df.groupby(["restaurant_code", "review_title", "review_body", "review_date",\
+    aggregated_df = df.groupby(["restaurant_code", "review_title", "review_body", "review_title_raw", "review_body_raw", "review_date",\
         "account_name", "account_id", "account_level", "account_photo", "review_photo", "scraped_date"], 
         as_index=False)["review_rating_food", "review_rating_service", "review_rating_price", "review_rating_ambience",\
             "review_rating_portion", "review_rating_time"].sum()
