@@ -51,13 +51,14 @@ restaurants_list.sort() # sort in alphabetical order
 
 # retrieve number of reviews per restaurant
 # REVIEWS_CSV_PATH = 'data/reviews_final.csv' # LOCAL DATA SOURCE
-# reviews_data = pd.read_csv(REVIEWS_CSV_PATH)
+REVIEWS_CSV_PATH = 'https://raw.githubusercontent.com/ValaryLim/bt4222-burpple-reviews/yanjean_deploy/dashboard/data_final/reviews_final_raw_subset.csv'
+reviews_data = pd.read_csv(REVIEWS_CSV_PATH)
 
-REVIEWS_CSV_PATH_1 = 'https://raw.githubusercontent.com/ValaryLim/bt4222-burpple-reviews/yanjean_deploy/dashboard/data_final/reviews_final_part1.csv'
-REVIEWS_CSV_PATH_2 = 'https://raw.githubusercontent.com/ValaryLim/bt4222-burpple-reviews/yanjean_deploy/dashboard/data_final/reviews_final_part2.csv'
-reviews_data_1 = pd.read_csv(REVIEWS_CSV_PATH_1)
-reviews_data_2 = pd.read_csv(REVIEWS_CSV_PATH_2)
-reviews_data = reviews_data_1.append(reviews_data_2).reset_index(drop=True)
+# REVIEWS_CSV_PATH_1 = 'https://raw.githubusercontent.com/ValaryLim/bt4222-burpple-reviews/yanjean_deploy/dashboard/data_final/reviews_final_part1.csv'
+# REVIEWS_CSV_PATH_2 = 'https://raw.githubusercontent.com/ValaryLim/bt4222-burpple-reviews/yanjean_deploy/dashboard/data_final/reviews_final_part2.csv'
+# reviews_data_1 = pd.read_csv(REVIEWS_CSV_PATH_1)
+# reviews_data_2 = pd.read_csv(REVIEWS_CSV_PATH_2)
+# reviews_data = reviews_data_1.append(reviews_data_2).reset_index(drop=True)
 
 reviews_per_restaurant = reviews_data['restaurant_code'].value_counts()
 
