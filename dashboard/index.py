@@ -3,8 +3,11 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
-# import apps
+# connect to main app.py file
 from app import app
+from app import server
+
+# connect to pages
 from apps import main_page, restaurant_page
 
 #### APP LAYOUT ##########################################################
@@ -23,11 +26,8 @@ def display_page(pathname):
         return main_page.layout
     elif '/restaurant-' in pathname:
         return restaurant_page.layout
-    #     return # something
-    # else: # default start page
-    #     return search_restaurants.layout
     else:
-        return '404'
+        return '404 Page Not Found Error'
 
 if __name__ == '__main__':
     app.run_server(debug=True)
