@@ -10,6 +10,7 @@ from nltk.corpus import stopwords
 nltk.download('wordnet')
 from gensim.parsing.preprocessing import STOPWORDS
 from nltk.stem import WordNetLemmatizer, PorterStemmer 
+nltk.download('wordnet')
 
 STOPWORD_SET = list(STOPWORDS.union(set(stopwords.words("english"))))
 NEGATION_TERMS = ["not", "never", "no", "nothing", "neither", "nowhere", "doesn't", "doesn", "isn't", "isn", \
