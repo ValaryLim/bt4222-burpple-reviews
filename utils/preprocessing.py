@@ -29,6 +29,10 @@ def preprocessing_pipeline(review_file, preprocessed_csv):
     # convert any np.nans to empty string
     review_df = review_df.fillna("") 
 
+    # keep original raw
+    review_df["review_title_raw"] = review_df["review_title"]
+    review_df["review_body_raw"] = review_df["review_body"]
+
     # clean review text
     review_df["review_title"] = review_df["review_title"].apply(lambda x: clean_review(x))
     review_df["review_body"] = review_df["review_body"].apply(lambda x: clean_review(x))

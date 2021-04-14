@@ -7,8 +7,10 @@ from emot.emo_unicode import UNICODE_EMO, EMOTICONS
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import nltk
 from nltk.corpus import stopwords
+nltk.download('wordnet')
 from gensim.parsing.preprocessing import STOPWORDS
 from nltk.stem import WordNetLemmatizer, PorterStemmer 
+nltk.download('wordnet')
 
 STOPWORD_SET = list(STOPWORDS.union(set(stopwords.words("english"))))
 NEGATION_TERMS = ["not", "never", "no", "nothing", "neither", "nowhere", "doesn't", "doesn", "isn't", "isn", \
@@ -92,7 +94,8 @@ def postprocessing_pipeline(rule_mined_csv, postprocessed_csv):
 
     # aggregate phrases
     postprocessed_df = rule_mined_df.groupby(["restaurant_code", "review_title", "review_body", "review_date",\
-        "account_name", "account_id", "account_level", "account_photo", "review_photo", "scraped_date", "aspect"
+        "review_title_raw", "review_body_raw", "account_name", "account_id", "account_level", "account_photo", \
+        "review_photo", "scraped_date", "aspect"
         ], as_index=False).agg({
             "phrase": " ".join,
             "phrase_lemma":" ".join,
