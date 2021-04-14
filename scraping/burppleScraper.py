@@ -8,7 +8,10 @@ from bs4 import BeautifulSoup
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
-from .scrapingUtils import *
+if __name__ == "__main__":
+    from scrapingUtils import *
+else:
+    from .scrapingUtils import *
 
 RESTAURANT_OFFSET_INCREMENT = 12
 REVIEW_OFFSET_INCREMENT = 20
@@ -189,7 +192,7 @@ def scrape_reviews_by_restaurant(restaurant_code, browser):
     review_df["scraped_date"] = datetime.date.today()
     return review_df
 
-def generate_restaurants(restaurant_list_dir, restaurant_csv, browser):
+def generate_restaurants(restaurant_list_dir, browser):
     # retrieve neighbourhoods
     neighbourhoods = scrape_neighbourhoods(browser)
 
@@ -265,7 +268,7 @@ def scrape_details_by_restaurant(restaurant_code, browser):
     return restaurant_description, restaurant_hours, restaurant_address, restaurant_number, restaurant_website, restaurant_photos
 
 def generate_restaurant_details(restaurant_csv, browser):
-    restaurant_df = pd.read_csv(restaurant_csv) #[7001:10000]
+    restaurant_df = pd.read_csv(restaurant_csv)
     codes, descriptions, hours, addresses, numbers, websites, photos = [], [], [], [], [], [], []
     count = 0
     for code in restaurant_df.restaurant_code:
@@ -315,7 +318,7 @@ def scraping_pipeline(restaurant_csv, restaurant_detailed_csv, review_csv):
 
     with Chrome("./scraping/utils/chromedriver", options=chrome_options) as browser:
         print("scraping restaurants")
-        generate_restaurants(restaurant_list_dir=RESTAURANT_LIST_DIR, restaurant_csv=restaurant_csv, browser=browser)
+        generate_restaurants(restaurant_list_dir=RESTAURANT_LIST_DIR, browser=browser)
 
         print("scraping additional restaurant details")
         restaurant_detailed_df = generate_restaurant_details(restaurant_csv=restaurant_csv, browser=browser)
@@ -333,13 +336,13 @@ def scraping_pipeline(restaurant_csv, restaurant_detailed_csv, review_csv):
         print("scraping done")
     return None
 
-if __name__ == "__main__":
+if __name__ == "__main__": #adhoc scraping
     # instantiate directories
-    RESTAURANT_LIST_DIR = "../data/raw/restaurant_lists_apr/"
-    RESTAURANT_CSV = "../data/processed/restaurant_all_apr.csv"
-    RESTAURANT_DETAILED_CSV = "../data/processed/restaurant_all_detailed_apr_5.csv"
-    # RESTAURANT_REVIEWS_DIR = "../data/raw/restaurant_reviews_mar/"
-    # REVIEWS_CSV = "../data/processed/reviews_all_mar.csv" 
+    RESTAURANT_LIST_DIR = "../data/raw/restaurant_lists/" 
+    RESTAURANT_CSV = "../data/processed/restaurant_all.csv"
+    RESTAURANT_DETAILED_CSV = "../data/processed/restaurant_all_detailed.csv"
+    RESTAURANT_REVIEWS_DIR = "../data/raw/restaurant_reviews/"
+    REVIEWS_CSV = "../data/processed/reviews_all.csv" 
 
     # configure chrome options 
     chrome_options = Options()  
@@ -354,9 +357,9 @@ if __name__ == "__main__":
 
     with Chrome("./utils/chromedriver", options=chrome_options) as browser:
         # generate restaurants
-        # generate_restaurants(restaurant_list_dir=RESTAURANT_LIST_DIR, browser=browser)
+        generate_restaurants(restaurant_list_dir=RESTAURANT_LIST_DIR, browser=browser)
         # compile restaurants 
-        # utils.compile(raw_dir=RESTAURANT_LIST_DIR, compiled_dir=RESTAURANT_CSV)
+        compile(raw_dir=RESTAURANT_LIST_DIR, compiled_dir=RESTAURANT_CSV)
 
         # generate restaurant details
         restaurant_detailed_df = generate_restaurant_details(restaurant_csv=RESTAURANT_CSV, browser=browser)
@@ -366,4 +369,4 @@ if __name__ == "__main__":
         generate_reviews(restaurant_csv=RESTAURANT_CSV, restaurant_reviews_dir=RESTAURANT_REVIEWS_DIR, browser=browser)
 
         # compile restaurants 
-        # utils.compile(raw_dir=RESTAURANT_REVIEWS_DIR, compiled_dir=REVIEWS_CSV)
+        compile(raw_dir=RESTAURANT_REVIEWS_DIR, compiled_dir=REVIEWS_CSV)
