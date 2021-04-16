@@ -8,7 +8,7 @@ scraper1
 scraper2
 scraper3
 scraper4
-utils/scraping/chromedriver.exe
+scraping_utils/chromedriver.exe
 
 dashboard/data
 
