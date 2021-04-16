@@ -61,19 +61,6 @@ validation_reviews_subset_df = validation_reviews_subset_df.reset_index(drop=Tru
 train_validation_reviews_subset_df = train_reviews_subset_df.copy()
 train_validation_reviews_subset_df.append(validation_reviews_subset_df, ignore_index=True)
 
-# save train, validation, test restaurants
-with open('../data/train_test/restaurant_lists/test.txt', 'w') as filehandle:
-    for listitem in test_restaurants:
-        filehandle.write('%s\n' % listitem)
-
-with open('../data/train_test/restaurant_lists/train.txt', 'w') as filehandle:
-    for listitem in train_restaurants:
-        filehandle.write('%s\n' % listitem)
-
-with open('../data/train_test/restaurant_lists/validation.txt', 'w') as filehandle:
-    for listitem in validation_restaurants:
-        filehandle.write('%s\n' % listitem)
-
 # save all reviews datasets to dataframe
 test_reviews_df.to_csv("../data/train_test/reviews_test.csv", index=False)
 nontest_reviews_df.to_csv("../data/train_test/reviews_nontest.csv", index=False)

@@ -15,17 +15,11 @@ dashboard/data
 
 # fasttext utils: pretrained yelp_review_polarity.bin
 modelling/utils/fasttext
-modelling/dummy_data.py
 # data folder
 modelling/data
 # cache and runs for BERT model
 modelling/cache_dir
 modelling/runs
 modelling/saved_models/bert
-modelling/new_labels
-
-data/pipeline
-modelling/stacking_folds
-modelling/fold_predictions
-# bert model is too large to push to github
+# final bert model is too large to push to github
 modelling/saved_models/model_bert/
