@@ -13,6 +13,7 @@ if __name__ == "__main__":
 else:
     from .scrapingUtils import *
 
+
 RESTAURANT_OFFSET_INCREMENT = 12
 REVIEW_OFFSET_INCREMENT = 20
 
@@ -316,7 +317,7 @@ def scraping_pipeline(restaurant_csv, restaurant_detailed_csv, review_csv):
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--no-sandbox")
 
-    with Chrome("./scraping/utils/chromedriver", options=chrome_options) as browser:
+    with Chrome("./utils/scraping/chromedriver", options=chrome_options) as browser:
         print("scraping restaurants")
         generate_restaurants(restaurant_list_dir=RESTAURANT_LIST_DIR, browser=browser)
 
@@ -355,7 +356,7 @@ if __name__ == "__main__": #adhoc scraping
     chrome_options.add_argument("--disable-browser-side-navigation")
     chrome_options.add_argument("--disable-gpu") 
 
-    with Chrome("./utils/chromedriver", options=chrome_options) as browser:
+    with Chrome("../utils/scraping/chromedriver", options=chrome_options) as browser:
         # generate restaurants
         generate_restaurants(restaurant_list_dir=RESTAURANT_LIST_DIR, browser=browser)
         # compile restaurants 
