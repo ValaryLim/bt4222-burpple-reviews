@@ -4,12 +4,11 @@ cache_dir
 .DS_Store
 .ipynb_checkpoints
 
-scraping/chromedriver
-scraping/chromedriver.exe
 scraper1
 scraper2
 scraper3
 scraper4
+utils/scraping/chromedriver.exe
 
 dashboard/data
 

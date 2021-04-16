@@ -13,6 +13,7 @@ if __name__ == "__main__":
 else:
     from .scrapingUtils import *
 
+
 RESTAURANT_OFFSET_INCREMENT = 12
 REVIEW_OFFSET_INCREMENT = 20
 
