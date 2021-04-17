@@ -131,7 +131,7 @@ def meta_modelling_pipeline(prediction_csv, ensemble_file):
        'SVM_prob_pos', 'SVM_prob_neg', 'VADER_prob_pos', 'VADER_prob_neg']])[:, 0:3]
     predictions_df[["prob_neg","prob_neu","prob_pos"]] = predictions
     
-    ensemble_predictions = pd.DataFrame(data=predictions_df,columns=["restaurant_code", "review_title", "review_body", "review_date", "account_name", 
+    ensemble_predictions = pd.DataFrame(data=predictions_df,columns=["restaurant_code", "review_title", "review_body", "review_title_raw", "review_body_raw", "review_date", "account_name", 
         "account_id",  "account_level", "account_photo", "review_photo", "scraped_date", "location", "aspect", 
         "prob_pos", "prob_neu", "prob_neg"]) 
     
