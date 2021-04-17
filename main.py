@@ -19,7 +19,7 @@ RESTAURANT_FINAL = "data/pipeline/restaurants_final.csv"
 
 if __name__ == "__main__":
     # scrape
-    # scraping.scraping_pipeline(RESTAURANT_CSV, RESTAURANT_DETAILED_CSV, REVIEW_CSV)
+    scraping.scraping_pipeline(RESTAURANT_CSV, RESTAURANT_DETAILED_CSV, REVIEW_CSV)
     
     # preprocessing
     utils.preprocessing_pipeline(REVIEW_CSV, PREPROCESSED_CSV)

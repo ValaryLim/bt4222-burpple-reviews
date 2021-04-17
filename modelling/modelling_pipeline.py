@@ -129,6 +129,9 @@ def meta_modelling_pipeline(prediction_csv, ensemble_file):
        'fasttext_prob_neg', 'logreg_prob_pos', 'logreg_prob_neg',
        'NB_prob_pos', 'NB_prob_neg', 'RF_prob_pos', 'RF_prob_neg',
        'SVM_prob_pos', 'SVM_prob_neg', 'VADER_prob_pos', 'VADER_prob_neg']])[:, 0:3]
+    predictions_df["prob_neg"] = 0
+    predictions_df["prob_neu"] = 0
+    predictions_df["prob_pos"] = 0
     predictions_df[["prob_neg","prob_neu","prob_pos"]] = predictions
     
     ensemble_predictions = pd.DataFrame(data=predictions_df,columns=["restaurant_code", "review_title", "review_body", "review_title_raw", "review_body_raw", "review_date", "account_name", 
