@@ -4,7 +4,7 @@ alembic==1.5.4
 altair==4.1.0
 appnope==0.1.2
 argon2-cffi==20.1.0
-aspect-based-sentiment-analysis==2.0.2
+aspect-based-sentiment-analysis
 astor==0.8.1
 astunparse==1.6.3
 async-generator==1.10
@@ -43,9 +43,10 @@ DateTime==4.3
 decorator==4.4.2
 defusedxml==0.6.0
 docker-pycreds==0.4.0
+eli5==0.11.0
 emot==2.1
-en-core-web-md==3.0.0
-en-core-web-sm==3.0.0
+https://github.com/explosion/spacy-models/releases/download/en_core_web_md-3.0.0/en_core_web_md-3.0.0.tar.gz
+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.0.0/en_core_web_sm-3.0.0.tar.gz
 entrypoints==0.3
 fasttext==0.9.2
 filelock==3.0.12
@@ -57,6 +58,7 @@ gast==0.3.3
 gensim==4.0.0
 gitdb==4.0.5
 GitPython==3.1.14
+graphviz==0.16
 google-api-core==1.26.0
 google-auth==1.25.0
 google-auth-oauthlib==0.4.2
@@ -95,9 +97,6 @@ Markdown==3.3.3
 MarkupSafe==1.1.1
 matplotlib==3.3.2
 mistune==0.8.4
-mkl-fft==1.2.0
-mkl-random==1.1.1
-mkl-service==2.3.0
 murmurhash==1.0.5
 nbclient==0.5.1
 nbconvert==6.0.7
@@ -142,7 +141,7 @@ pycparser==2.20
 pydantic==1.7.3
 pydeck==0.6.1
 Pygments==2.7.4
-pyLDAvis==3.3.1
+pyLDAvis
 pyparsing==2.4.7
 pyperclip==1.8.1
 pyrsistent==0.17.3
@@ -184,6 +183,7 @@ srsly==2.4.0
 stevedore==3.3.0
 streamlit==0.78.0
 subprocess32==3.5.4
+tabulate==0.8.9
 tensorboard==2.2.2
 tensorboard-plugin-wit==1.8.0
 tensorboardX==2.1
