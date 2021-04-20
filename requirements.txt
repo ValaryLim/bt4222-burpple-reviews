@@ -205,7 +205,7 @@ tornado==6.1
 tqdm==4.56.0
 traitlets==5.0.5
 transformers==4.3.3
-twint==2.1.21
+twint==2.1.20
 typer==0.3.2
 typing-extensions==3.7.4.3
 tzlocal==2.1
